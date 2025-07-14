@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.weather.R
-import com.example.weather.navigation.AppScreens
+import com.example.weather.navigation.AppRoutes
 import kotlinx.coroutines.delay
 
 @Composable
@@ -46,8 +46,8 @@ fun WeatherSplashScreen(navController: NavController) {
             )
         )
 
-        delay(800L)
-        navController.navigate(route = AppScreens.MainScreen.name)
+        delay(600L)
+        navController.navigate(route = AppRoutes.MainScreen.name)
     }
 
     Scaffold(

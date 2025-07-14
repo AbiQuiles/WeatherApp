@@ -1,6 +1,6 @@
 package com.example.weather.navigation
 
-enum class AppScreens {
+enum class AppRoutes {
     SplashScreen,
     MainScreen,
     FavoriteScreen,

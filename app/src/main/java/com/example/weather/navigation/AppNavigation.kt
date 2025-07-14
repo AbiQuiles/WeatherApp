@@ -1,12 +1,17 @@
 package com.example.weather.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.weather.screens.main.WeatherMainScreen
 import com.example.weather.screens.WeatherSplashScreen
+import com.example.weather.screens.main.WeatherMainScreen
+import com.example.weather.screens.search.WeatherSearchScreen
 
 @Composable
 fun AppNavigation() {
@@ -14,14 +19,59 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = AppScreens.SplashScreen.name,
+        startDestination = AppRoutes.SplashScreen.name,
     ) {
-        composable(route = AppScreens.SplashScreen.name) {
-            WeatherSplashScreen(navController = navController)
-        }
+        splashScreen(navController = navController)
+        mainScreen(navController = navController)
+        searchScreen(navController)
+    }
+}
 
-        composable(route = AppScreens.MainScreen.name) {
-            WeatherMainScreen(navController = navController)
+
+private fun NavGraphBuilder.splashScreen(navController: NavController) {
+    composable(route = AppRoutes.SplashScreen.name,) {
+        WeatherSplashScreen(navController = navController)
+    }
+}
+
+private fun NavGraphBuilder.mainScreen(navController: NavController) {
+    composable(route = AppRoutes.MainScreen.name) {
+        WeatherMainScreen(navController = navController)
+    }
+}
+
+private fun NavGraphBuilder.searchScreen(navController: NavController) {
+    val transitionTimeDuration = 500
+
+    composable(
+        route = AppRoutes.SearchScreen.name,
+        enterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Up,
+                animationSpec = tween(transitionTimeDuration)
+            )
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                animationSpec = tween(transitionTimeDuration)
+
+            )
+        },
+        popEnterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Up,
+                animationSpec = tween(transitionTimeDuration)
+            )
+        },
+        popExitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                animationSpec = tween(transitionTimeDuration)
+
+            )
         }
+    ) {
+        WeatherSearchScreen(navController = navController)
     }
 }
