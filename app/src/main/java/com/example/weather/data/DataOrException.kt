@@ -1,7 +1,6 @@
 package com.example.weather.data
 
-class DataOrException<D, Boolean, E: Exception>(
+class DataOrException<D, E: Exception>(
     var data: D? = null,
-    var loading: Boolean? = null,
     var e: E? = null
 )

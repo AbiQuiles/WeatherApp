@@ -29,9 +29,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,20 +45,24 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.rememberAsyncImagePainter
-import com.example.weather.data.DataOrException
-import com.example.weather.models.Weather
+import com.example.weather.models.ui.WeatherMainUiState
 import com.example.weather.navigation.AppRoutes
 import com.example.weather.widgets.TopBar
 
 @Composable
 fun WeatherMainScreen(navController: NavController, viewModel: WeatherMainViewModel = hiltViewModel()) {
-    val weatherData = produceState(
+   /* val weatherData = produceState(
         initialValue = DataOrException(loading = true)
     ) {
-        value = viewModel.getWeatherData(city = "Altamonte Springs")
-    }.value
-    val weather = weatherData.data
-    val loadingState = weatherData.loading
+        value = viewModel.getWeather(city = "Orlando")
+    }.value*/
+    val weatherUiState by viewModel.weatherUiState.collectAsState()
+    val loadingState by remember(weatherUiState) {
+        if (weatherUiState == null)
+            mutableStateOf(true)
+        else
+            mutableStateOf(false)
+    }
 
     Scaffold(
         topBar = {
@@ -67,15 +71,11 @@ fun WeatherMainScreen(navController: NavController, viewModel: WeatherMainViewMo
             )
         }
     ) { innerPadding ->
-
-        if (loadingState == true && weather != null) {
-            CircularProgressIndicator(modifier = Modifier.fillMaxSize())
-        } else {
             MainLayout(
-                weather = weather,
+                weatherUiState = weatherUiState,
+                loadingState = loadingState,
                 modifier = Modifier.padding(innerPadding)
             )
-        }
     }
 }
 
@@ -165,7 +165,8 @@ private fun MinimalDropdownMenu() {
 
 @Composable
 private fun MainLayout(
-    weather: Weather?,
+    weatherUiState: WeatherMainUiState?,
+    loadingState: Boolean,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -175,27 +176,36 @@ private fun MainLayout(
             .fillMaxSize()
             .padding(12.dp)
     ) {
-        item {
-            CurrentWeather()
-            Spacer(modifier = Modifier.padding(6.dp))
-            WeekForecastCard(
-                dayForecastImage = weather?.list?.first()?.weather?.first()?.icon ?: ""
-            )
-        }
+            item {
+                if (!loadingState && weatherUiState != null) {
+                    CurrentWeather(
+                        location = weatherUiState.city,
+                        currentTemp = weatherUiState.currentTemp,
+                        tempDescription = weatherUiState.tempDescription,
+                        feelsLike = weatherUiState.feelsLike,
+                        highAndLowTemp = weatherUiState.highAndLowTemp
+                    )
+                    Spacer(modifier = Modifier.padding(6.dp))
+                    /*WeekForecastCard(
+                        dayForecastImage = weatherEntity?.list?.first()?.weather?.first()?.icon ?: ""
+                    )*/
+                } else {
+                    CircularProgressIndicator(modifier = modifier)
+                }
+            }
     }
 }
 
 @Composable
 private fun CurrentWeather(
-    location: String = "Orlando",
-    currentWeather: String = "83°",
-    weatherDescription: String = "Sunny Day",
-    feelsLike: String = "86°",
-    highAndLow: Pair<String, String> = Pair("89°", "75°"),
+    location: String,
+    currentTemp: String,
+    tempDescription: String,
+    feelsLike: String,
+    highAndLowTemp: Pair<String, String>,
 ) {
     Column(
-        verticalArrangement = Arrangement
-            .spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(4.dp)
     ) {
@@ -204,12 +214,12 @@ private fun CurrentWeather(
             fontSize = 55.sp,
         )
         Text(
-            text = currentWeather,
+            text = currentTemp,
             fontSize = 90.sp,
             fontWeight = FontWeight.W300
         )
         Text(
-            text = weatherDescription,
+            text = tempDescription,
             fontSize = 18.sp
         )
         Text(
@@ -221,7 +231,7 @@ private fun CurrentWeather(
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
-                text = "Heigh ${highAndLow.first} | Low ${highAndLow.second}",
+                text = "Heigh ${highAndLowTemp.first} | Low ${highAndLowTemp.second}",
                 fontSize = 18.sp
             )
         }
@@ -316,5 +326,8 @@ private fun TopAppBarPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun MainLayoutPreview() {
-    MainLayout(weather = null)
+    MainLayout(
+        weatherUiState = WeatherMainUiState(),
+        loadingState = false
+    )
 }

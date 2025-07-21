@@ -1,6 +1,6 @@
-package com.example.weather.models
+package com.example.weather.models.data
 
-data class FullWeather(
+data class WeatherLarge(
     val clouds: Int,
     val deg: Int,
     val dt: Int,
@@ -13,5 +13,5 @@ data class FullWeather(
     val sunrise: Int,
     val sunset: Int,
     val temp: Temp,
-    val weather: List<WeatherObject>
+    val weather: List<WeatherSmall>
 )
