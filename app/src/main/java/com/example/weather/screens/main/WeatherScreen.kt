@@ -45,20 +45,22 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.rememberAsyncImagePainter
-import com.example.weather.models.ui.WeatherMainUiState
+import com.example.weather.models.ui.weather.CurrentWeatherUiState
+import com.example.weather.models.ui.weather.DailyForecastItemUiState
 import com.example.weather.navigation.AppRoutes
 import com.example.weather.widgets.TopBar
 
 @Composable
-fun WeatherMainScreen(navController: NavController, viewModel: WeatherMainViewModel = hiltViewModel()) {
+fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel = hiltViewModel()) {
    /* val weatherData = produceState(
         initialValue = DataOrException(loading = true)
     ) {
         value = viewModel.getWeather(city = "Orlando")
     }.value*/
-    val weatherUiState by viewModel.weatherUiState.collectAsState()
-    val loadingState by remember(weatherUiState) {
-        if (weatherUiState == null)
+    val currentWeatherUiState by viewModel.currentWeatherUiState.collectAsState()
+    val dailyForecastItemUiState by viewModel.dailyForecastItemUiState.collectAsState()
+    val loadingState by remember(currentWeatherUiState) {
+        if (currentWeatherUiState == null)
             mutableStateOf(true)
         else
             mutableStateOf(false)
@@ -72,7 +74,8 @@ fun WeatherMainScreen(navController: NavController, viewModel: WeatherMainViewMo
         }
     ) { innerPadding ->
             MainLayout(
-                weatherUiState = weatherUiState,
+                currentWeatherUiState = currentWeatherUiState,
+                dailyForecastItemUiState = dailyForecastItemUiState,
                 loadingState = loadingState,
                 modifier = Modifier.padding(innerPadding)
             )
@@ -165,7 +168,8 @@ private fun MinimalDropdownMenu() {
 
 @Composable
 private fun MainLayout(
-    weatherUiState: WeatherMainUiState?,
+    currentWeatherUiState: CurrentWeatherUiState?,
+    dailyForecastItemUiState: List<DailyForecastItemUiState?>,
     loadingState: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -177,18 +181,16 @@ private fun MainLayout(
             .padding(12.dp)
     ) {
             item {
-                if (!loadingState && weatherUiState != null) {
+                if (!loadingState && currentWeatherUiState != null) {
                     CurrentWeather(
-                        location = weatherUiState.city,
-                        currentTemp = weatherUiState.currentTemp,
-                        tempDescription = weatherUiState.tempDescription,
-                        feelsLike = weatherUiState.feelsLike,
-                        highAndLowTemp = weatherUiState.highAndLowTemp
+                        location = currentWeatherUiState.city,
+                        currentTemp = currentWeatherUiState.currentTemp,
+                        tempDescription = currentWeatherUiState.tempDescription,
+                        feelsLike = currentWeatherUiState.feelsLike,
+                        highAndLowTemp = currentWeatherUiState.highAndLowTemp
                     )
                     Spacer(modifier = Modifier.padding(6.dp))
-                    /*WeekForecastCard(
-                        dayForecastImage = weatherEntity?.list?.first()?.weather?.first()?.icon ?: ""
-                    )*/
+                    WeekForecastCard(dailyForecastItemUiState = dailyForecastItemUiState)
                 } else {
                     CircularProgressIndicator(modifier = modifier)
                 }
@@ -231,7 +233,7 @@ private fun CurrentWeather(
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
-                text = "Heigh ${highAndLowTemp.first} | Low ${highAndLowTemp.second}",
+                text = "High ${highAndLowTemp.first} | Low ${highAndLowTemp.second}",
                 fontSize = 18.sp
             )
         }
@@ -239,11 +241,7 @@ private fun CurrentWeather(
 }
 
 @Composable
-private fun WeekForecastCard(
-    dayOfWeek: String = "Today",
-    dayForecastImage: String = "",
-    highAndLow: Pair<String, String> = Pair("89°", "75°")
-) {
+private fun WeekForecastCard(dailyForecastItemUiState: List<DailyForecastItemUiState?>) {
     Surface(
         shape = RoundedCornerShape(10.dp),
         color = Color(0xFFB7D9F5),
@@ -273,41 +271,68 @@ private fun WeekForecastCard(
                 )
             }
 
-            for(i in 1..14) {
-                HorizontalDivider(
-                    thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(6.dp)
-                )
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 8.dp)
-                ) {
-                    Text(
-                        text = dayOfWeek,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Medium
+            if (dailyForecastItemUiState.isNotEmpty()) {
+                dailyForecastItemUiState.forEach { dailyForecastItem ->
+                    HorizontalDivider(
+                        thickness = 0.5.dp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(6.dp)
                     )
-                    CurrentWeatherImage(weatherImage = dayForecastImage)
 
-                    Text(
-                        text = "Low ${highAndLow.second} |  High ${highAndLow.first}",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                    if (dailyForecastItem != null) {
+                        DailyForecastItem(
+                            dayOfWeek = dailyForecastItem.day,
+                            forecastUrlImage = dailyForecastItem.forecastUrlImage,
+                            highAndLow = dailyForecastItem.highAndLowTemp
+                        )
+                    } else {
+                        CircularProgressIndicator(
+                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
+            } else {
+                CircularProgressIndicator(
+                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
     }
 }
 
 @Composable
-private fun CurrentWeatherImage(weatherImage: String) {
-    val imageUrl = "https://openweathermap.org/img/wn/${weatherImage}.png"
-    val painter = rememberAsyncImagePainter(imageUrl)
+private fun DailyForecastItem(
+    dayOfWeek: String,
+    forecastUrlImage: String,
+    highAndLow: Pair<String, String>,
+) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 8.dp)
+    ) {
+        Text(
+            text = dayOfWeek,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Medium
+        )
+        CurrentWeatherImage(forecastUrlImage = forecastUrlImage)
+
+        Text(
+            text = "Low ${highAndLow.second} |  High ${highAndLow.first}",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun CurrentWeatherImage(forecastUrlImage: String) {
+    val painter = rememberAsyncImagePainter(forecastUrlImage)
 
     Image(
         painter = painter,
@@ -327,7 +352,16 @@ private fun TopAppBarPreview() {
 @Composable
 private fun MainLayoutPreview() {
     MainLayout(
-        weatherUiState = WeatherMainUiState(),
+        currentWeatherUiState = CurrentWeatherUiState(),
+        dailyForecastItemUiState = listOf(DailyForecastItemUiState()),
         loadingState = false
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun WeekForecastCardPreview() {
+    WeekForecastCard(
+        dailyForecastItemUiState = listOf(DailyForecastItemUiState())
     )
 }

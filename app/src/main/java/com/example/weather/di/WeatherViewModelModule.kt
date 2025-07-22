@@ -1,6 +1,6 @@
 package com.example.weather.di
 
-import com.example.weather.models.ModelConverter
+import com.example.weather.models.converters.WeatherModelsConverter
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -10,9 +10,9 @@ import dagger.hilt.android.scopes.ViewModelScoped
 
 @InstallIn(ViewModelComponent::class)
 @Module
-object WeatherMainViewModelModule {
+object WeatherViewModelModule {
 
     @Provides
     @ViewModelScoped
-    fun provideModelConverter() : ModelConverter = ModelConverter()
+    fun provideModelConverter() : WeatherModelsConverter = WeatherModelsConverter()
 }

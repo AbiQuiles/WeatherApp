@@ -1,4 +1,4 @@
-package com.example.weather.data
+package com.example.weather.util.data
 
 class DataOrException<D, E: Exception>(
     var data: D? = null,
