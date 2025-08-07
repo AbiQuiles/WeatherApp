@@ -23,11 +23,12 @@ fun AppNavigation() {
     ) {
         splashScreen(navController = navController)
         mainScreen(navController = navController)
-        searchScreen(navController)
+        searchScreen(navController = navController)
     }
 }
 
-
+//!! Might Change
+//Currently Not Used - Went with Android Default Icon Splash Screen
 private fun NavGraphBuilder.splashScreen(navController: NavController) {
     composable(route = AppRoutes.SplashScreen.name,) {
         WeatherSplashScreen(navController = navController)
@@ -40,6 +41,8 @@ private fun NavGraphBuilder.mainScreen(navController: NavController) {
     }
 }
 
+//!! Might Change
+//Currently Not Used - Went with Jetpack Bottom Sheet
 private fun NavGraphBuilder.searchScreen(navController: NavController) {
     val transitionTimeDuration = 500
 
@@ -72,6 +75,6 @@ private fun NavGraphBuilder.searchScreen(navController: NavController) {
             )
         }
     ) {
-        WeatherSearchScreen(navController = navController)
+        WeatherSearchScreen()
     }
 }

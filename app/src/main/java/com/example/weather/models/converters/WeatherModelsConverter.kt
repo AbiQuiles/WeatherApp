@@ -58,7 +58,7 @@ class WeatherModelsConverter {
     }
 
     private fun convertTempToUiModel(temp: Double) =
-        temp.roundToInt().toString()
+        temp.roundToInt().toString().plus("°")
 
     private fun capFirstCharInWords(string: String): String {
         if (string.isBlank()) {

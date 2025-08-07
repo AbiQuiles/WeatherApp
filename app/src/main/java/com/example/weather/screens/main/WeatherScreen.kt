@@ -6,28 +6,37 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ManageSearch
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -47,7 +56,9 @@ import androidx.navigation.NavController
 import coil3.compose.rememberAsyncImagePainter
 import com.example.weather.models.ui.weather.CurrentWeatherUiState
 import com.example.weather.models.ui.weather.DailyForecastItemUiState
-import com.example.weather.navigation.AppRoutes
+import com.example.weather.screens.search.WeatherSearchScreen
+import com.example.weather.widgets.FloatingModal
+import com.example.weather.widgets.SwitcherRow
 import com.example.weather.widgets.TopBar
 
 @Composable
@@ -68,9 +79,7 @@ fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel = hi
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                onSearchRoute = { navController.navigate(route = AppRoutes.SearchScreen.name) }
-            )
+            TopAppBar()
         }
     ) { innerPadding ->
             MainLayout(
@@ -83,20 +92,14 @@ fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel = hi
 }
 
 @Composable
-private fun TopAppBar(onSearchRoute: () -> Unit) {
+private fun TopAppBar() {
     TopBar(
         title = "Weather",
-        onExitRoute = { },
         isMainScreen = true,
         customActions = {
-            IconButton(onClick = onSearchRoute) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search Icon",
-                    modifier = Modifier.size(30.dp)
-                )
-            }
-            MinimalDropdownMenu()
+            SearchBottomSheet()
+            SettingsBottomSheet()
+            //MinimalDropdownMenu()
         }
     )
 }
@@ -126,14 +129,14 @@ private fun MinimalDropdownMenu() {
             DropdownMenuItem(
                 text = {
                     Text(
-                        text = "Edit",
+                        text = "Permissions",
                         fontSize = 18.sp,
                     )
                 },
                 leadingIcon = {
                     Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit Icon",
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Settings Icon",
                         modifier = Modifier.size(20.dp)
                     )
                 },
@@ -163,6 +166,82 @@ private fun MinimalDropdownMenu() {
             )
         }
 
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun SearchBottomSheet() {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showBottomSheetState by remember {
+        mutableStateOf(false)
+    }
+
+    IconButton(
+        onClick = {
+            showBottomSheetState = true
+        }) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Default.ManageSearch,
+            contentDescription = "Search Icon",
+            modifier = Modifier.size(30.dp)
+        )
+    }
+
+    if (showBottomSheetState) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheetState = false },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface,
+            modifier = Modifier
+                .padding(top = 60.dp)
+                .windowInsetsPadding(WindowInsets.systemBars)
+        ) {
+            WeatherSearchScreen()
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun SettingsBottomSheet() {
+    var showBottomSheetState by remember {
+        mutableStateOf(false)
+    }
+
+    IconButton(
+        onClick = { showBottomSheetState = true }
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Settings,
+            contentDescription = "Settings Icon",
+            modifier = Modifier.size(25.dp)
+        )
+    }
+
+    if (showBottomSheetState) {
+        FloatingModal(showBottomSheetState = { showBottomSheetState = false }) {
+            Column {
+                Text(
+                    text = "Permissions",
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(horizontal = 10.dp)
+                )
+                SwitcherRow(
+                    icon = Icons.Default.Notifications,
+                    text = "Notification"
+                ) {
+
+                }
+                SwitcherRow(
+                    icon = Icons.Default.LocationOn,
+                    text = "Location"
+                ) {
+
+                }
+            }
+        }
     }
 }
 
@@ -218,7 +297,7 @@ private fun CurrentWeather(
         Text(
             text = currentTemp,
             fontSize = 90.sp,
-            fontWeight = FontWeight.W300
+            fontWeight = FontWeight.W300,
         )
         Text(
             text = tempDescription,
@@ -244,7 +323,6 @@ private fun CurrentWeather(
 private fun WeekForecastCard(dailyForecastItemUiState: List<DailyForecastItemUiState?>) {
     Surface(
         shape = RoundedCornerShape(10.dp),
-        color = Color(0xFFB7D9F5),
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
@@ -312,8 +390,9 @@ private fun DailyForecastItem(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(horizontal = 8.dp)
+
     ) {
         Text(
             text = dayOfWeek,
@@ -338,30 +417,63 @@ private fun CurrentWeatherImage(forecastUrlImage: String) {
         painter = painter,
         contentDescription = "Current Weather Image",
         contentScale = ContentScale.FillBounds,
-        modifier = Modifier.size(45.dp)
+        modifier = Modifier.size(60.dp)
     )
+
 }
 
+/**Preview Functions **/
 @Preview
 @Composable
 private fun TopAppBarPreview() {
-    TopAppBar(onSearchRoute = {})
+    TopAppBar()
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun MainLayoutPreview() {
+    val currentWeatherUiState = CurrentWeatherUiState()
+    val dailyForecastItemUiState = DailyForecastItemUiState()
+
     MainLayout(
-        currentWeatherUiState = CurrentWeatherUiState(),
-        dailyForecastItemUiState = listOf(DailyForecastItemUiState()),
-        loadingState = false
+        currentWeatherUiState = currentWeatherUiState,
+        dailyForecastItemUiState = listOf(
+            dailyForecastItemUiState,
+            dailyForecastItemUiState,
+            dailyForecastItemUiState,
+            dailyForecastItemUiState,
+            dailyForecastItemUiState,
+            dailyForecastItemUiState
+        ),
+        loadingState = false,
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CurrentWeatherPreview() {
+    val currentWeatherUiState = CurrentWeatherUiState()
+
+    CurrentWeather(
+        location = currentWeatherUiState.city,
+        currentTemp = currentWeatherUiState.currentTemp,
+        tempDescription = currentWeatherUiState.tempDescription,
+        feelsLike = currentWeatherUiState.feelsLike,
+        highAndLowTemp = currentWeatherUiState.highAndLowTemp
+
     )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun WeekForecastCardPreview() {
+    val dailyForecastItemUiState = DailyForecastItemUiState()
+
     WeekForecastCard(
-        dailyForecastItemUiState = listOf(DailyForecastItemUiState())
+        dailyForecastItemUiState = listOf(
+            dailyForecastItemUiState,
+            dailyForecastItemUiState,
+            dailyForecastItemUiState
+        )
     )
 }
