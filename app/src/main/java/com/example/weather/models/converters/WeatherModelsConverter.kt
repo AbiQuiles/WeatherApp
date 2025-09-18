@@ -1,8 +1,8 @@
 package com.example.weather.models.converters
 
 import android.annotation.SuppressLint
-import com.example.weather.models.data.WeatherEntity
-import com.example.weather.models.data.WeatherLarge
+import com.example.weather.models.data.weather.WeatherEntity
+import com.example.weather.models.data.weather.WeatherLarge
 import com.example.weather.models.ui.weather.CurrentWeatherUiState
 import com.example.weather.models.ui.weather.DailyForecastItemUiState
 import java.text.SimpleDateFormat

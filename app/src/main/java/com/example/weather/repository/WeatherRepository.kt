@@ -1,8 +1,8 @@
 package com.example.weather.repository
 
 import android.util.Log
+import com.example.weather.models.data.weather.WeatherEntity
 import com.example.weather.util.data.DataOrException
-import com.example.weather.models.data.WeatherEntity
 import com.example.weather.network.WeatherApi
 import javax.inject.Inject
 

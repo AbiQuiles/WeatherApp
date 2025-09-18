@@ -1,6 +1,6 @@
 package com.example.weather.network
 
-import com.example.weather.models.data.WeatherEntity
+import com.example.weather.models.data.weather.WeatherEntity
 import retrofit2.http.GET
 import retrofit2.http.Query
 import javax.inject.Singleton
