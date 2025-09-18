@@ -63,11 +63,6 @@ import com.example.weather.widgets.TopBar
 
 @Composable
 fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel = hiltViewModel()) {
-   /* val weatherData = produceState(
-        initialValue = DataOrException(loading = true)
-    ) {
-        value = viewModel.getWeather(city = "Orlando")
-    }.value*/
     val currentWeatherUiState by viewModel.currentWeatherUiState.collectAsState()
     val dailyForecastItemUiState by viewModel.dailyForecastItemUiState.collectAsState()
     val loadingState by remember(currentWeatherUiState) {
@@ -98,7 +93,7 @@ private fun TopAppBar() {
         isMainScreen = true,
         customActions = {
             SearchBottomSheet()
-            SettingsBottomSheet()
+            //SettingsBottomSheet()
             //MinimalDropdownMenu()
         }
     )

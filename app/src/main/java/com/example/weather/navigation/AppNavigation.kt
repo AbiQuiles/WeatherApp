@@ -21,9 +21,9 @@ fun AppNavigation() {
         navController = navController,
         startDestination = AppRoutes.MainScreen.name,
     ) {
-        splashScreen(navController = navController)
+        //splashScreen(navController = navController)
         mainScreen(navController = navController)
-        searchScreen(navController = navController)
+        //searchScreen(navController = navController)
     }
 }
 
