@@ -24,11 +24,12 @@ class WeatherViewModel @Inject constructor(
     private val _dailyForecastItemUiState = MutableStateFlow<List<DailyForecastItemUiState>>(emptyList())
     val dailyForecastItemUiState: StateFlow<List<DailyForecastItemUiState?>> = _dailyForecastItemUiState.asStateFlow()
 
+    //TODO: ViewModel should not the aware of the Entity
     init {
         viewModelScope.launch {
             repository.getWeather(cityQuery = "Orlando").data?.let { entity ->
                 _currentWeatherUiState.value = converter.weatherEntityToCurrentWeatherUiState(
-                    weatherEntity = entity
+                    weatherDto = entity
                 )
 
                 _dailyForecastItemUiState.value = entity.list.slice(1..6).map { weatherLarge ->
@@ -38,17 +39,5 @@ class WeatherViewModel @Inject constructor(
                 }
             }
         }
-
-    }
-
-    suspend fun getWeather(city: String): StateFlow<CurrentWeatherUiState?> {
-        _currentWeatherUiState.value =
-            repository.getWeather(cityQuery = city).data?.let { entity ->
-                converter.weatherEntityToCurrentWeatherUiState(
-                    weatherEntity = entity
-                )
-            }
-
-        return currentWeatherUiState
     }
 }

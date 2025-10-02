@@ -6,13 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -32,11 +29,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -47,16 +42,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import coil3.compose.rememberAsyncImagePainter
 import com.example.weather.models.ui.weather.CurrentWeatherUiState
 import com.example.weather.models.ui.weather.DailyForecastItemUiState
-import com.example.weather.screens.search.WeatherSearchScreen
+import com.example.weather.navigation.AppRoutes
 import com.example.weather.widgets.FloatingModal
 import com.example.weather.widgets.SwitcherRow
 import com.example.weather.widgets.TopBar
@@ -74,7 +71,7 @@ fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel = hi
 
     Scaffold(
         topBar = {
-            TopAppBar()
+            TopAppBar(navController = navController)
         }
     ) { innerPadding ->
             MainLayout(
@@ -87,12 +84,18 @@ fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel = hi
 }
 
 @Composable
-private fun TopAppBar() {
+private fun TopAppBar(navController: NavController) {
     TopBar(
         title = "Weather",
         isMainScreen = true,
         customActions = {
-            SearchBottomSheet()
+            SearchBottomSheet(
+                navigate = {
+                    navController.navigate(
+                        route = AppRoutes.SearchScreen.name
+                    )
+                }
+            )
             //SettingsBottomSheet()
             //MinimalDropdownMenu()
         }
@@ -166,34 +169,16 @@ private fun MinimalDropdownMenu() {
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun SearchBottomSheet() {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var showBottomSheetState by remember {
-        mutableStateOf(false)
-    }
-
+private fun SearchBottomSheet(navigate: () -> Unit) {
     IconButton(
         onClick = {
-            showBottomSheetState = true
+            navigate()
         }) {
         Icon(
             imageVector = Icons.AutoMirrored.Default.ManageSearch,
             contentDescription = "Search Icon",
             modifier = Modifier.size(30.dp)
         )
-    }
-
-    if (showBottomSheetState) {
-        ModalBottomSheet(
-            onDismissRequest = { showBottomSheetState = false },
-            sheetState = sheetState,
-            containerColor = MaterialTheme.colorScheme.surface,
-            modifier = Modifier
-                .padding(top = 60.dp)
-                .windowInsetsPadding(WindowInsets.systemBars)
-        ) {
-            WeatherSearchScreen()
-        }
     }
 }
 
@@ -421,7 +406,8 @@ private fun CurrentWeatherImage(forecastUrlImage: String) {
 @Preview
 @Composable
 private fun TopAppBarPreview() {
-    TopAppBar()
+    val fakeNaveController = NavHostController(LocalContext.current)
+    TopAppBar(navController = fakeNaveController)
 }
 
 @Preview(showBackground = true)

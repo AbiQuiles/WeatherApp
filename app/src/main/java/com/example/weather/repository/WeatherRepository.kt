@@ -1,14 +1,14 @@
 package com.example.weather.repository
 
 import android.util.Log
-import com.example.weather.models.data.weather.WeatherEntity
+import com.example.weather.models.data.weather.WeatherDto
 import com.example.weather.util.data.DataOrException
 import com.example.weather.network.WeatherApi
 import javax.inject.Inject
 
 class WeatherRepository @Inject constructor(private val api: WeatherApi) {
 
-    suspend fun getWeather(cityQuery: String): DataOrException<WeatherEntity, Exception> {
+    suspend fun getWeather(cityQuery: String): DataOrException<WeatherDto, Exception> {
         val response = try {
             api.getWeather(query = cityQuery)
 

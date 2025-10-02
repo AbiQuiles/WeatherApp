@@ -1,7 +1,7 @@
 package com.example.weather.models.converters
 
 import android.annotation.SuppressLint
-import com.example.weather.models.data.weather.WeatherEntity
+import com.example.weather.models.data.weather.WeatherDto
 import com.example.weather.models.data.weather.WeatherLarge
 import com.example.weather.models.ui.weather.CurrentWeatherUiState
 import com.example.weather.models.ui.weather.DailyForecastItemUiState
@@ -11,11 +11,11 @@ import kotlin.math.roundToInt
 
 class WeatherModelsConverter {
 
-    fun weatherEntityToCurrentWeatherUiState(weatherEntity: WeatherEntity): CurrentWeatherUiState {
-        val weatherLarge = weatherEntity.list.first()
+    fun weatherEntityToCurrentWeatherUiState(weatherDto: WeatherDto): CurrentWeatherUiState {
+        val weatherLarge = weatherDto.list.first()
         val weatherSmall = weatherLarge.weather.first()
 
-        val city = weatherEntity.city.name
+        val city = weatherDto.city.name
         val currentTemp = convertTempToUiModel(weatherLarge.temp.day)
         val tempDescription = capFirstCharInWords(weatherSmall.description)
         val feelsLike = convertTempToUiModel(weatherLarge.feels_like.day)

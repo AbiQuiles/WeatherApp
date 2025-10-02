@@ -1,6 +1,6 @@
 package com.example.weather.network
 
-import com.example.weather.models.data.weather.WeatherEntity
+import com.example.weather.models.data.weather.WeatherDto
 import retrofit2.http.GET
 import retrofit2.http.Query
 import javax.inject.Singleton
@@ -13,5 +13,5 @@ interface WeatherApi {
         @Query("q") query: String,
         @Query("units") units: String = "imperial",
         @Query("appid") appid: String = NetworkConstants.API_KEY
-    ): WeatherEntity
+    ): WeatherDto
 }

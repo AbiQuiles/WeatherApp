@@ -1,6 +1,6 @@
 package com.example.weather.models.data.weather
 
-data class WeatherEntity(
+data class WeatherDto(
     val city: City,
     val cnt: Int,
     val cod: String,

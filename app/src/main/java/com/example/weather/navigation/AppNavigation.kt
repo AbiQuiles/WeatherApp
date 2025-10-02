@@ -23,7 +23,7 @@ fun AppNavigation() {
     ) {
         //splashScreen(navController = navController)
         mainScreen(navController = navController)
-        //searchScreen(navController = navController)
+        searchScreen(navController = navController)
     }
 }
 
@@ -75,6 +75,6 @@ private fun NavGraphBuilder.searchScreen(navController: NavController) {
             )
         }
     ) {
-        WeatherSearchScreen()
+        WeatherSearchScreen(navController = navController)
     }
 }
