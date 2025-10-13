@@ -41,8 +41,6 @@ private fun NavGraphBuilder.mainScreen(navController: NavController) {
     }
 }
 
-//!! Might Change
-//Currently Not Used - Went with Jetpack Bottom Sheet
 private fun NavGraphBuilder.searchScreen(navController: NavController) {
     val transitionTimeDuration = 500
 

@@ -1,10 +1,10 @@
-package com.example.weather.di.viewmodels
+package com.example.weather.di
 
 import com.google.gson.Gson
-import dagger.hilt.components.SingletonComponent
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 object DataModule {

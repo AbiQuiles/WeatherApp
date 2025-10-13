@@ -59,7 +59,10 @@ import com.example.weather.widgets.SwitcherRow
 import com.example.weather.widgets.TopBar
 
 @Composable
-fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel = hiltViewModel()) {
+fun WeatherScreen(
+    navController: NavController,
+    viewModel: WeatherViewModel = hiltViewModel()
+) {
     val currentWeatherUiState by viewModel.currentWeatherUiState.collectAsState()
     val dailyForecastItemUiState by viewModel.dailyForecastItemUiState.collectAsState()
     val loadingState by remember(currentWeatherUiState) {
@@ -89,7 +92,7 @@ private fun TopAppBar(navController: NavController) {
         title = "Weather",
         isMainScreen = true,
         customActions = {
-            SearchBottomSheet(
+            SearchButton(
                 navigate = {
                     navController.navigate(
                         route = AppRoutes.SearchScreen.name
@@ -101,6 +104,22 @@ private fun TopAppBar(navController: NavController) {
         }
     )
 }
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun SearchButton(navigate: () -> Unit) {
+    IconButton(
+        onClick = {
+            navigate()
+        }) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Default.ManageSearch,
+            contentDescription = "Search Icon",
+            modifier = Modifier.size(30.dp)
+        )
+    }
+}
+
 
 @Composable
 private fun MinimalDropdownMenu() {
@@ -164,21 +183,6 @@ private fun MinimalDropdownMenu() {
             )
         }
 
-    }
-}
-
-@Composable
-@OptIn(ExperimentalMaterial3Api::class)
-private fun SearchBottomSheet(navigate: () -> Unit) {
-    IconButton(
-        onClick = {
-            navigate()
-        }) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Default.ManageSearch,
-            contentDescription = "Search Icon",
-            modifier = Modifier.size(30.dp)
-        )
     }
 }
 

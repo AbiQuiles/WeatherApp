@@ -27,13 +27,14 @@ class WeatherViewModel @Inject constructor(
     //TODO: ViewModel should not the aware of the Entity
     init {
         viewModelScope.launch {
-            repository.getWeather(cityQuery = "Orlando").data?.let { entity ->
-                _currentWeatherUiState.value = converter.weatherEntityToCurrentWeatherUiState(
-                    weatherDto = entity
+
+            repository.getWeather(cityQuery = "Orlando").data?.let { weatherDto ->
+                _currentWeatherUiState.value = converter.weatherDtoToCurrentWeatherUiState(
+                    weatherDto = weatherDto
                 )
 
-                _dailyForecastItemUiState.value = entity.list.slice(1..6).map { weatherLarge ->
-                    converter.weatherEntityToDailyIForecastItemUiState(
+                _dailyForecastItemUiState.value = weatherDto.list.slice(1..6).map { weatherLarge ->
+                    converter.weatherLargeToDailyIForecastItemUiState(
                         weatherLarge = weatherLarge
                     )
                 }

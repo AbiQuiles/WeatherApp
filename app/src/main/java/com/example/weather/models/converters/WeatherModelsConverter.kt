@@ -11,7 +11,7 @@ import kotlin.math.roundToInt
 
 class WeatherModelsConverter {
 
-    fun weatherEntityToCurrentWeatherUiState(weatherDto: WeatherDto): CurrentWeatherUiState {
+    fun weatherDtoToCurrentWeatherUiState(weatherDto: WeatherDto): CurrentWeatherUiState {
         val weatherLarge = weatherDto.list.first()
         val weatherSmall = weatherLarge.weather.first()
 
@@ -32,7 +32,7 @@ class WeatherModelsConverter {
         )
     }
 
-    fun weatherEntityToDailyIForecastItemUiState(weatherLarge: WeatherLarge): DailyForecastItemUiState {
+    fun weatherLargeToDailyIForecastItemUiState(weatherLarge: WeatherLarge): DailyForecastItemUiState {
         val weatherSmall = weatherLarge.weather.first()
         val imageUrlKey = weatherSmall.icon
 
