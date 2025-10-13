@@ -1,9 +1,12 @@
 package com.example.weather.models.converters
 
 import android.annotation.SuppressLint
+import com.example.weather.models.data.location.LocationSavedEntity
+import com.example.weather.models.data.location.LocationSupportedEntity
 import com.example.weather.models.data.weather.WeatherDto
 import com.example.weather.models.data.weather.WeatherLarge
-import com.example.weather.models.ui.location.SearchResultItemUiState
+import com.example.weather.models.ui.search.SavedItemUiState
+import com.example.weather.models.ui.search.SearchItemUiState
 import com.example.weather.models.ui.weather.CurrentWeatherUiState
 import com.example.weather.models.ui.weather.DailyForecastItemUiState
 import java.text.SimpleDateFormat
@@ -50,6 +53,35 @@ class WeatherModelsConverter {
         )
     }
 
+    /** Search Section Converter*/
+
+    fun savedEntityToSavedItemUiState(entities: List<LocationSavedEntity>): MutableList<SavedItemUiState> {
+        val savedItemUiStateList = mutableListOf<SavedItemUiState>()
+
+        entities.forEach {entity ->
+
+            savedItemUiStateList.add(
+                SavedItemUiState(name = entity.name)
+            )
+        }
+
+        return savedItemUiStateList
+    }
+
+    fun supportedEntityToSearchItemUiState(entities: List<LocationSupportedEntity>): List<SearchItemUiState> {
+        val searchItemUiStateList = mutableListOf<SearchItemUiState>()
+
+        entities.forEach { entity ->
+            searchItemUiStateList.add(
+                SearchItemUiState(name = entity.name)
+            )
+        }
+
+        return searchItemUiStateList
+    }
+
+    /** Helper Functions*/
+
     @SuppressLint("SimpleDateFormat")
     private fun formatDate(timestamp: Int): String {
         val converter = SimpleDateFormat("EEE, MMM d")
@@ -74,19 +106,5 @@ class WeatherModelsConverter {
                         it.toString()
                 }
             }
-    }
-
-    /** Search Section Converter*/
-
-    fun locationEntityToSearchResultItemUiState(rawList: List<String>): List<SearchResultItemUiState> {
-        val searchResultListUiState = mutableListOf<SearchResultItemUiState>()
-
-        rawList.forEach {
-            searchResultListUiState.add(
-                SearchResultItemUiState(name = it)
-            )
-        }
-
-        return searchResultListUiState
     }
 }

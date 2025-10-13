@@ -5,8 +5,8 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.UUID
 
-@Entity(tableName = "locations_tbl")
-data class LocationEntity(
+@Entity(tableName = "location_supported_tbl")
+data class LocationSupportedEntity(
     @PrimaryKey
     val id: UUID = UUID.randomUUID(),
     @ColumnInfo(name = "location_name")

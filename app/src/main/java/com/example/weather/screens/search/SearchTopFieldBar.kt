@@ -94,7 +94,6 @@ private fun SearchField(
             if (newText.isNotBlank()) {
                 debounceJob = coroutineScope.launch {
                     delay(2000L)
-                    println("Rez UI $value | $newText")
                     onSearch(newText)
                 }
             } else {

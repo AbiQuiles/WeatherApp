@@ -8,6 +8,7 @@ package com.example.weather.screens.search
  import androidx.compose.foundation.layout.padding
  import androidx.compose.foundation.layout.size
  import androidx.compose.foundation.lazy.LazyColumn
+ import androidx.compose.foundation.lazy.items
  import androidx.compose.material.icons.Icons
  import androidx.compose.material.icons.filled.LocationOn
  import androidx.compose.material.icons.rounded.Search
@@ -30,12 +31,13 @@ package com.example.weather.screens.search
  import androidx.compose.ui.unit.sp
  import androidx.hilt.navigation.compose.hiltViewModel
  import androidx.navigation.NavController
- import com.example.weather.models.ui.location.SearchResultItemUiState
- import com.example.weather.models.ui.location.SearchResultListUiState
+ import com.example.weather.models.ui.search.SavedItemUiState
+ import com.example.weather.models.ui.search.SearchItemUiState
+ import com.example.weather.models.ui.search.SearchListUiState
 
 @Composable
 fun WeatherSearchScreen(navController: NavController, viewModel: WeatherSearchViewModel = hiltViewModel()) {
-    val searchResultListUiState by viewModel.searchResultListUiState.collectAsState()
+    val searchResultListUiState by viewModel.searchListUiState.collectAsState()
     val searchTextState = remember { mutableStateOf("") }
 
     Scaffold(
@@ -54,7 +56,7 @@ fun WeatherSearchScreen(navController: NavController, viewModel: WeatherSearchVi
         containerColor = MaterialTheme.colorScheme.surface
     ) { innerPadding ->
         MainLayout(
-            searchResultListUiState = searchResultListUiState,
+            searchListUiState = searchResultListUiState,
             searchText = searchTextState.value,
             modifier = Modifier.padding(innerPadding)
         )
@@ -63,13 +65,11 @@ fun WeatherSearchScreen(navController: NavController, viewModel: WeatherSearchVi
 
 @Composable
 private fun MainLayout(
-    searchResultListUiState: SearchResultListUiState,
+    searchListUiState: SearchListUiState,
     searchText: String,
     modifier: Modifier = Modifier,
 ) {
-    val searchResults = searchResultListUiState.items
-
-    println("RezUi - $searchResults")
+    val searchItems = searchListUiState.items
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -78,43 +78,29 @@ private fun MainLayout(
             .fillMaxSize()
             .padding(4.dp)
     ) {
-        if (searchResults.isNotEmpty() && searchText.isEmpty()) {
-            ScrollableLayout {
-                searchResults.forEach { itemUiState ->
-                    SavedItem()
-                }
-            }
-        } else if (searchText.isNotEmpty()) {
-            ScrollableLayout {
-                searchResults.forEach { itemUiState ->
-                    SearchedItem(itemUiState)
-                }
-            }
-        } else if(searchResultListUiState.isLoading) {
+        if (searchListUiState.isLoading) {
             CircularProgressIndicator(
                 strokeWidth = 2.dp,
                 modifier = Modifier.size(28.dp)
             )
+        } else if (searchItems.isNotEmpty()) {
+            LazyColumn (
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(6.dp)
+            ) {
+                items(searchItems) { item ->
+                    if (searchText.isEmpty() && item is SavedItemUiState) {
+                        SavedItem(savedItem = item)
+                    } else if (searchText.isNotEmpty() && item is SearchItemUiState) {
+                        SearchedItem(searchItem = item)
+                    }
+                }
+            }
         } else {
             NoLocationView()
-        }
-    }
-}
-
-@Composable
-private fun ScrollableLayout(
-    modifier: Modifier = Modifier,
-    context: @Composable () -> Unit
-) {
-    LazyColumn (
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top,
-        modifier = modifier
-            .fillMaxSize()
-            .padding(4.dp)
-    ) {
-        item {
-            context()
         }
     }
 }
@@ -144,7 +130,7 @@ private fun NoLocationView() {
 }
 
 @Composable
-private fun SavedItem() {
+private fun SavedItem(savedItem: SavedItemUiState) {
     Card(
         shape = MaterialTheme.shapes.small,
         modifier = Modifier.padding(6.dp)) {
@@ -159,7 +145,7 @@ private fun SavedItem() {
                     .fillMaxWidth()
             ) {
                 Text(
-                    text = "Orlando",
+                    text = savedItem.name,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -180,7 +166,7 @@ private fun SavedItem() {
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "L: -200° |  H: 200°",
+                    text = "L: ${savedItem.highAndLowTemp.first} |  H: ${savedItem.highAndLowTemp.second}°",
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -189,7 +175,7 @@ private fun SavedItem() {
 }
 
 @Composable
-private fun SearchedItem(searchItem: SearchResultItemUiState) {
+private fun SearchedItem(searchItem: SearchItemUiState) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(18.dp),
@@ -211,13 +197,13 @@ private fun SearchedItem(searchItem: SearchResultItemUiState) {
 
 @Preview(showBackground = true)
 @Composable
-private fun MainLayoutWithLocationItemsPreview() {
-    val mockSearchResultListUiState = SearchResultListUiState(
-        items = listOf(SearchResultItemUiState())
+private fun MainLayoutWithSavedItemsPreview() {
+    val mockSearchListUiState = SearchListUiState(
+        items = listOf(SavedItemUiState())
     )
 
     MainLayout(
-        searchResultListUiState = mockSearchResultListUiState,
+        searchListUiState = mockSearchListUiState,
         searchText = ""
     )
 }
@@ -225,12 +211,12 @@ private fun MainLayoutWithLocationItemsPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun MainLayoutWithSearchItemsPreview() {
-    val mockSearchResultListUiState = SearchResultListUiState(
-        items = listOf(SearchResultItemUiState())
+    val mockSearchListUiState = SearchListUiState(
+        items = listOf(SearchItemUiState())
     )
 
     MainLayout(
-        searchResultListUiState = mockSearchResultListUiState,
+        searchListUiState = mockSearchListUiState,
         searchText = "Not Empty"
     )
 }
@@ -239,7 +225,7 @@ private fun MainLayoutWithSearchItemsPreview() {
 @Composable
 private fun MainLayoutWithEmptyViewPreview() {
     MainLayout(
-        searchResultListUiState = SearchResultListUiState(),
+        searchListUiState = SearchListUiState(),
         searchText = ""
     )
 }
@@ -247,13 +233,13 @@ private fun MainLayoutWithEmptyViewPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun MainLayoutWithLoadingViewPreview() {
-    val mockSearchResultListUiState = SearchResultListUiState(
+    val mockSearchListUiState = SearchListUiState(
         isLoading = true,
         items = listOf()
     )
 
     MainLayout(
-        searchResultListUiState = mockSearchResultListUiState,
+        searchListUiState = mockSearchListUiState,
         searchText = ""
     )
 }
@@ -261,12 +247,12 @@ private fun MainLayoutWithLoadingViewPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun SearchedItemPreview() {
-    SearchedItem(SearchResultItemUiState())
+    SearchedItem(SearchItemUiState())
 }
 
 
 @Preview(showBackground = true)
 @Composable
 private fun SavedItemPreview() {
-    SavedItem()
+    SavedItem(savedItem = SavedItemUiState())
 }

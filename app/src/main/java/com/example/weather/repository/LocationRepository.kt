@@ -1,31 +1,66 @@
 package com.example.weather.repository
 
 import android.content.Context
-import android.util.Log
-import com.example.weather.models.data.location.LocationEntity
+import com.example.weather.models.data.location.LocationSavedEntity
+import com.example.weather.models.data.location.LocationSupportedEntity
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import okio.IOException
-import java.io.InputStreamReader
 import javax.inject.Inject
 
 class LocationRepository @Inject constructor(
     private val context: Context,
     private val gson: Gson
 ) {
-    val _mockLocations = listOf(
-        "Orlando",
-        "Altamonte Springs",
-        "Wekiva",
-        "Apopka",
-        "Maitland",
-        "Winter Park",
-        "Maimi",
-        "Clair Mount",
-        "Ocoee",
+    val _mockLocationSaved: List<LocationSavedEntity> = listOf(
+        LocationSavedEntity(
+            name = "Orlando",
+            maxTemp = "-65",
+            minTemp = "102+"
+        ),
+        LocationSavedEntity(name = "Altamonte Springs",
+            maxTemp = "-65",
+            minTemp = "102+"
+        ),
+        LocationSavedEntity(name = "Wekiva",
+            maxTemp = "-65",
+            minTemp = "102+"
+        ),
+        LocationSavedEntity(name = "Apopka",
+            maxTemp = "-65",
+            minTemp = "102+"
+        ),
+        LocationSavedEntity(name = "Maitland",
+            maxTemp = "-65",
+            minTemp = "102+"
+        ),
+        LocationSavedEntity(name = "Winter Park",
+            maxTemp = "-65",
+            minTemp = "102+"
+        ),
+        LocationSavedEntity(name = "Maimi",
+            maxTemp = "-65",
+            minTemp = "102+"
+        ),
+        LocationSavedEntity(name = "Clair Mount",
+            maxTemp = "-65",
+            minTemp = "102+"
+        ),
+        LocationSavedEntity(name = "Ocoee",
+            maxTemp = "-65",
+            minTemp = "102+"
+        ),
     )
+    val _mockLocationsSupported: List<LocationSupportedEntity> = listOf(
+        LocationSupportedEntity(name = "Orlando"),
+        LocationSupportedEntity(name = "Altamonte Springs"),
+        LocationSupportedEntity(name = "Wekiva"),
+        LocationSupportedEntity(name = "Apopka"),
+        LocationSupportedEntity(name = "Maitland"),
+        LocationSupportedEntity(name = "Winter Park"),
+        LocationSupportedEntity(name = "Maimi"),
+        LocationSupportedEntity(name = "Clair Mount"),
+        LocationSupportedEntity(name = "Ocoee"),
+    )
+
 
     private val INPUT_FILE_NAME = "locations_list.json"
     private val TAG = "LocationRepository"
