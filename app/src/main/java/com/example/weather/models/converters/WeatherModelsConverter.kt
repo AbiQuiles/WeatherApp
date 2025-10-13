@@ -3,6 +3,7 @@ package com.example.weather.models.converters
 import android.annotation.SuppressLint
 import com.example.weather.models.data.weather.WeatherDto
 import com.example.weather.models.data.weather.WeatherLarge
+import com.example.weather.models.ui.location.SearchResultItemUiState
 import com.example.weather.models.ui.weather.CurrentWeatherUiState
 import com.example.weather.models.ui.weather.DailyForecastItemUiState
 import java.text.SimpleDateFormat
@@ -73,5 +74,19 @@ class WeatherModelsConverter {
                         it.toString()
                 }
             }
+    }
+
+    /** Search Section Converter*/
+
+    fun locationEntityToSearchResultItemUiState(rawList: List<String>): List<SearchResultItemUiState> {
+        val searchResultListUiState = mutableListOf<SearchResultItemUiState>()
+
+        rawList.forEach {
+            searchResultListUiState.add(
+                SearchResultItemUiState(name = it)
+            )
+        }
+
+        return searchResultListUiState
     }
 }
