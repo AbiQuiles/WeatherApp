@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,6 +31,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.weather.models.ui.search.searchbar.SearchBarEvents
+import com.example.weather.models.ui.search.searchbar.SearchBarUiState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -37,12 +40,11 @@ import kotlinx.coroutines.launch
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun SearchTopFieldBar(
-    searchText: String = "",
-    searchTextState: (String) -> Unit,
-    onSearch: (String) -> Unit,
-    onExitRoute: () -> Unit = {},
+    uiState: SearchBarUiState,
+    events: SearchBarEvents,
     customActions: @Composable () -> Unit = {},
 ) {
+
     TopAppBar(
         title = {
             Row(
@@ -51,17 +53,15 @@ fun SearchTopFieldBar(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 SearchField(
-                    value = searchText,
-                    valueState = searchTextState
-                ) {
-                    onSearch(it)
-                }
+                    uiState = uiState,
+                    events = events
+                )
             }
         },
         colors =  TopAppBarDefaults.topAppBarColors(MaterialTheme.colorScheme.background),
         navigationIcon = {
             IconButton(
-                onClick = onExitRoute,
+                onClick = events.onExitRoute,
                 modifier = Modifier.size(24.dp)
                 ) {
                 Icon(
@@ -76,9 +76,8 @@ fun SearchTopFieldBar(
 
 @Composable
 private fun SearchField(
-    value: String,
-    valueState: (String) -> Unit,
-    onSearch: (String) -> Unit,
+    uiState: SearchBarUiState,
+    events: SearchBarEvents,
 ) {
     //TODO: Use FocusRequester to to display keyboard immediately
     //Debouncer
@@ -86,18 +85,20 @@ private fun SearchField(
     var debounceJob by remember { mutableStateOf<Job?>(null) }
 
     OutlinedTextField(
-        value = value,
+        value = uiState.searchText,
         onValueChange = { newText ->
-            valueState(newText)
+            events.searchTextChange(newText)
 
             debounceJob?.cancel()
             if (newText.isNotBlank()) {
+                events.isLoading(true)
                 debounceJob = coroutineScope.launch {
-                    delay(2000L)
-                    onSearch(newText)
+                    delay(1000L)
+                    events.onSearch(newText)
                 }
             } else {
-                onSearch("")
+                events.onSearch("")
+                events.isLoading(false)
             }
         },
         textStyle =  TextStyle(
@@ -114,11 +115,12 @@ private fun SearchField(
             )
         },
         trailingIcon = {
-            if (value.isNotEmpty()) {
+            if (uiState.searchText.isNotBlank() && !uiState.isLoading) {
                 IconButton(
                     onClick = {
-                        valueState("")
-                        onSearch("")
+                        events.searchTextChange("")
+                        events.onSearch("")
+                        events.isLoading(false)
                     }
                 ) {
                     Icon(
@@ -126,6 +128,11 @@ private fun SearchField(
                         contentDescription = "Clear Text Button"
                     )
                 }
+            } else if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(28.dp)
+                )
             }
         },
         singleLine = true,
@@ -139,21 +146,21 @@ private fun SearchField(
 @Preview
 @Composable
 private fun TopAppBarMainPreview() {
+    val uiState = SearchBarUiState(searchText = "Not Empty")
+    val events = SearchBarEvents({}, {}, {})
     SearchTopFieldBar(
-        searchText = "Not Empty",
-        searchTextState = {},
-        onExitRoute = {},
-        onSearch = {}
+        uiState = uiState,
+        events = events
     )
 }
 
 @Preview
 @Composable
 private fun TopAppBarPreview() {
+    val uiState = SearchBarUiState(searchText = "")
+    val events = SearchBarEvents({}, {}, {})
     SearchTopFieldBar(
-        searchText = "",
-        searchTextState = {},
-        onExitRoute = {},
-        onSearch = {},
+        uiState = uiState,
+        events = events
     )
 }

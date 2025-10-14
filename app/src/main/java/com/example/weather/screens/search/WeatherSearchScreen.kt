@@ -10,10 +10,10 @@ package com.example.weather.screens.search
  import androidx.compose.foundation.lazy.LazyColumn
  import androidx.compose.foundation.lazy.items
  import androidx.compose.material.icons.Icons
+ import androidx.compose.material.icons.filled.LocationOff
  import androidx.compose.material.icons.filled.LocationOn
  import androidx.compose.material.icons.rounded.Search
  import androidx.compose.material3.Card
- import androidx.compose.material3.CircularProgressIndicator
  import androidx.compose.material3.Icon
  import androidx.compose.material3.MaterialTheme
  import androidx.compose.material3.Scaffold
@@ -21,10 +21,9 @@ package com.example.weather.screens.search
  import androidx.compose.runtime.Composable
  import androidx.compose.runtime.collectAsState
  import androidx.compose.runtime.getValue
- import androidx.compose.runtime.mutableStateOf
- import androidx.compose.runtime.remember
  import androidx.compose.ui.Alignment
  import androidx.compose.ui.Modifier
+ import androidx.compose.ui.graphics.vector.ImageVector
  import androidx.compose.ui.text.font.FontWeight
  import androidx.compose.ui.tooling.preview.Preview
  import androidx.compose.ui.unit.dp
@@ -34,30 +33,30 @@ package com.example.weather.screens.search
  import com.example.weather.models.ui.search.SavedItemUiState
  import com.example.weather.models.ui.search.SearchItemUiState
  import com.example.weather.models.ui.search.SearchListUiState
+ import com.example.weather.models.ui.search.searchbar.SearchBarEvents
 
 @Composable
 fun WeatherSearchScreen(navController: NavController, viewModel: WeatherSearchViewModel = hiltViewModel()) {
+    val searchBarUiState by viewModel.searchBarUiState.collectAsState()
     val searchResultListUiState by viewModel.searchListUiState.collectAsState()
-    val searchTextState = remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
             SearchTopFieldBar(
-                searchText = searchTextState.value,
-                searchTextState = { newText ->
-                    searchTextState.value = newText
-                },
-                onSearch = { query ->
-                    viewModel.getSearch(query)
-                },
-                onExitRoute = { navController.popBackStack() }
+                uiState = searchBarUiState,
+                events = SearchBarEvents(
+                    searchTextChange = { viewModel.setSearchBarText(it) },
+                    onSearch = { viewModel.getSearch(it) },
+                    isLoading = { viewModel.setSearchBarLoadingState(it) },
+                    onExitRoute = { navController.popBackStack() }
+                ),
             )
         },
         containerColor = MaterialTheme.colorScheme.surface
     ) { innerPadding ->
         MainLayout(
             searchListUiState = searchResultListUiState,
-            searchText = searchTextState.value,
+            searchText = searchBarUiState.searchText,
             modifier = Modifier.padding(innerPadding)
         )
     }
@@ -78,12 +77,7 @@ private fun MainLayout(
             .fillMaxSize()
             .padding(4.dp)
     ) {
-        if (searchListUiState.isLoading) {
-            CircularProgressIndicator(
-                strokeWidth = 2.dp,
-                modifier = Modifier.size(28.dp)
-            )
-        } else if (searchItems.isNotEmpty()) {
+        if (searchItems.isNotEmpty()) {
             LazyColumn (
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
@@ -99,31 +93,45 @@ private fun MainLayout(
                     }
                 }
             }
+        } else if (searchText.isNotEmpty() && searchItems.isEmpty()) {
+            MessageView(
+                mainMsg = "No location found",
+                subMsg = "Try searching for another location",
+                image = Icons.Default.LocationOff
+            )
         } else {
-            NoLocationView()
+            MessageView(
+                mainMsg = "No location saved",
+                subMsg = "Try searching for a location",
+                image = Icons.Default.LocationOn
+            )
         }
     }
 }
 
 @Composable
-private fun NoLocationView() {
+private fun MessageView(
+    mainMsg: String,
+    subMsg: String,
+    image: ImageVector
+) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
     ) {
         Icon(
-            imageVector = Icons.Default.LocationOn,
+            imageVector = image,
             contentDescription = "Location Image",
             modifier = Modifier.size(50.dp)
         )
         Text(
-            text = "No location save",
+            text = mainMsg,
             fontWeight = FontWeight.SemiBold,
             fontSize = 30.sp
         )
         Text(
-            text = "Try searching for a location",
+            text = subMsg,
             fontSize = 22.sp
         )
     }
@@ -223,7 +231,7 @@ private fun MainLayoutWithSearchItemsPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun MainLayoutWithEmptyViewPreview() {
+private fun MainLayoutWithNoSaveViewPreview() {
     MainLayout(
         searchListUiState = SearchListUiState(),
         searchText = ""
@@ -232,15 +240,10 @@ private fun MainLayoutWithEmptyViewPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun MainLayoutWithLoadingViewPreview() {
-    val mockSearchListUiState = SearchListUiState(
-        isLoading = true,
-        items = listOf()
-    )
-
+private fun MainLayoutWithNoResultViewPreview() {
     MainLayout(
-        searchListUiState = mockSearchListUiState,
-        searchText = ""
+        searchListUiState = SearchListUiState(),
+        searchText = "Location"
     )
 }
 
