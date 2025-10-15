@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class WeatherSearchViewModel @Inject constructor(
+class SearchViewModel @Inject constructor(
     private val repository: LocationRepository,
     private val converter: WeatherModelsConverter
 ) : ViewModel() {

@@ -1,5 +1,6 @@
 package com.example.weather.screens.search
 
+ import androidx.compose.foundation.clickable
  import androidx.compose.foundation.layout.Arrangement
  import androidx.compose.foundation.layout.Column
  import androidx.compose.foundation.layout.Row
@@ -34,9 +35,10 @@ package com.example.weather.screens.search
  import com.example.weather.models.ui.search.SearchItemUiState
  import com.example.weather.models.ui.search.SearchListUiState
  import com.example.weather.models.ui.search.searchbar.SearchBarEvents
+ import com.example.weather.navigation.AppNavKeys
 
 @Composable
-fun WeatherSearchScreen(navController: NavController, viewModel: WeatherSearchViewModel = hiltViewModel()) {
+fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel = hiltViewModel()) {
     val searchBarUiState by viewModel.searchBarUiState.collectAsState()
     val searchResultListUiState by viewModel.searchListUiState.collectAsState()
 
@@ -57,6 +59,14 @@ fun WeatherSearchScreen(navController: NavController, viewModel: WeatherSearchVi
         MainLayout(
             searchListUiState = searchResultListUiState,
             searchText = searchBarUiState.searchText,
+            onLocationClick = { locationClicked ->
+
+                navController.previousBackStackEntry
+                    ?.savedStateHandle
+                    ?.set(AppNavKeys.LOCATION_NAME, locationClicked)
+
+                navController.popBackStack()
+            },
             modifier = Modifier.padding(innerPadding)
         )
     }
@@ -66,6 +76,7 @@ fun WeatherSearchScreen(navController: NavController, viewModel: WeatherSearchVi
 private fun MainLayout(
     searchListUiState: SearchListUiState,
     searchText: String,
+    onLocationClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val searchItems = searchListUiState.items
@@ -89,7 +100,9 @@ private fun MainLayout(
                     if (searchText.isEmpty() && item is SavedItemUiState) {
                         SavedItem(savedItem = item)
                     } else if (searchText.isNotEmpty() && item is SearchItemUiState) {
-                        SearchedItem(searchItem = item)
+                        SearchedItem(searchItem = item) { locationClicked ->
+                            onLocationClick(locationClicked)
+                        }
                     }
                 }
             }
@@ -141,7 +154,8 @@ private fun MessageView(
 private fun SavedItem(savedItem: SavedItemUiState) {
     Card(
         shape = MaterialTheme.shapes.small,
-        modifier = Modifier.padding(6.dp)) {
+        modifier = Modifier.padding(6.dp)
+    ) {
         Column(
             modifier = Modifier
                 .padding(8.dp)
@@ -183,13 +197,16 @@ private fun SavedItem(savedItem: SavedItemUiState) {
 }
 
 @Composable
-private fun SearchedItem(searchItem: SearchItemUiState) {
+private fun SearchedItem(searchItem: SearchItemUiState, onLocationClick: (String) -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(18.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(12.dp)
+            .clickable(onClick = {
+            onLocationClick(searchItem.name)
+        })
     ) {
         Icon(
             imageVector = Icons.Rounded.Search,
@@ -212,7 +229,8 @@ private fun MainLayoutWithSavedItemsPreview() {
 
     MainLayout(
         searchListUiState = mockSearchListUiState,
-        searchText = ""
+        searchText = "",
+        onLocationClick = {}
     )
 }
 
@@ -225,7 +243,8 @@ private fun MainLayoutWithSearchItemsPreview() {
 
     MainLayout(
         searchListUiState = mockSearchListUiState,
-        searchText = "Not Empty"
+        searchText = "Not Empty",
+        onLocationClick = {}
     )
 }
 
@@ -234,7 +253,8 @@ private fun MainLayoutWithSearchItemsPreview() {
 private fun MainLayoutWithNoSaveViewPreview() {
     MainLayout(
         searchListUiState = SearchListUiState(),
-        searchText = ""
+        searchText = "",
+        onLocationClick = {}
     )
 }
 
@@ -243,19 +263,24 @@ private fun MainLayoutWithNoSaveViewPreview() {
 private fun MainLayoutWithNoResultViewPreview() {
     MainLayout(
         searchListUiState = SearchListUiState(),
-        searchText = "Location"
+        searchText = "Location",
+        onLocationClick = {}
     )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun SearchedItemPreview() {
-    SearchedItem(SearchItemUiState())
+    SearchedItem(SearchItemUiState()) {
+
+    }
 }
 
 
 @Preview(showBackground = true)
 @Composable
 private fun SavedItemPreview() {
-    SavedItem(savedItem = SavedItemUiState())
+    SavedItem(
+        savedItem = SavedItemUiState()
+    )
 }

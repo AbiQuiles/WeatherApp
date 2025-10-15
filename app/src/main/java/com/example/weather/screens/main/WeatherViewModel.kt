@@ -25,19 +25,21 @@ class WeatherViewModel @Inject constructor(
     val dailyForecastItemUiState: StateFlow<List<DailyForecastItemUiState?>> = _dailyForecastItemUiState.asStateFlow()
 
     //TODO: ViewModel should not the aware of the Entity
+    //TODO: Find a way to get the initial location from the device location or a user input
     init {
-        viewModelScope.launch {
+        getSelectedWeather(location = "Orlando")
+    }
 
-            repository.getWeather(cityQuery = "Orlando").data?.let { weatherDto ->
-                _currentWeatherUiState.value = converter.weatherDtoToCurrentWeatherUiState(
-                    weatherDto = weatherDto
+    fun getSelectedWeather(location: String) = viewModelScope.launch {
+        repository.getWeather(cityQuery = location).data?.let { weatherDto ->
+            _currentWeatherUiState.value = converter.weatherDtoToCurrentWeatherUiState(
+                weatherDto = weatherDto
+            )
+
+            _dailyForecastItemUiState.value = weatherDto.list.slice(1..6).map { weatherLarge ->
+                converter.weatherLargeToDailyIForecastItemUiState(
+                    weatherLarge = weatherLarge
                 )
-
-                _dailyForecastItemUiState.value = weatherDto.list.slice(1..6).map { weatherLarge ->
-                    converter.weatherLargeToDailyIForecastItemUiState(
-                        weatherLarge = weatherLarge
-                    )
-                }
             }
         }
     }

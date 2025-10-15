@@ -20,7 +20,7 @@ class LocationRepository @Inject constructor(
             maxTemp = "-65",
             minTemp = "102+"
         ),
-        LocationSavedEntity(name = "Wekiva",
+        LocationSavedEntity(name = "Wekiva Springs",
             maxTemp = "-65",
             minTemp = "102+"
         ),
@@ -36,11 +36,11 @@ class LocationRepository @Inject constructor(
             maxTemp = "-65",
             minTemp = "102+"
         ),
-        LocationSavedEntity(name = "Maimi",
+        LocationSavedEntity(name = "Miami",
             maxTemp = "-65",
             minTemp = "102+"
         ),
-        LocationSavedEntity(name = "Clair Mount",
+        LocationSavedEntity(name = "Clermont",
             maxTemp = "-65",
             minTemp = "102+"
         ),
@@ -52,12 +52,12 @@ class LocationRepository @Inject constructor(
     val _mockLocationsSupported: List<LocationSupportedEntity> = listOf(
         LocationSupportedEntity(name = "Orlando"),
         LocationSupportedEntity(name = "Altamonte Springs"),
-        LocationSupportedEntity(name = "Wekiva"),
+        LocationSupportedEntity(name = "Wekiva Springs"),
         LocationSupportedEntity(name = "Apopka"),
         LocationSupportedEntity(name = "Maitland"),
         LocationSupportedEntity(name = "Winter Park"),
-        LocationSupportedEntity(name = "Maimi"),
-        LocationSupportedEntity(name = "Clair Mount"),
+        LocationSupportedEntity(name = "Miami"),
+        LocationSupportedEntity(name = "Clermont"),
         LocationSupportedEntity(name = "Ocoee"),
     )
 

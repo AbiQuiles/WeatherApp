@@ -33,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,6 +55,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.rememberAsyncImagePainter
 import com.example.weather.models.ui.weather.CurrentWeatherUiState
 import com.example.weather.models.ui.weather.DailyForecastItemUiState
+import com.example.weather.navigation.AppNavKeys
 import com.example.weather.navigation.AppRoutes
 import com.example.weather.widgets.FloatingModal
 import com.example.weather.widgets.SwitcherRow
@@ -61,7 +64,8 @@ import com.example.weather.widgets.TopBar
 @Composable
 fun WeatherScreen(
     navController: NavController,
-    viewModel: WeatherViewModel = hiltViewModel()
+    viewModel: WeatherViewModel = hiltViewModel(),
+    locationName: String?
 ) {
     val currentWeatherUiState by viewModel.currentWeatherUiState.collectAsState()
     val dailyForecastItemUiState by viewModel.dailyForecastItemUiState.collectAsState()
@@ -70,6 +74,17 @@ fun WeatherScreen(
             mutableStateOf(true)
         else
             mutableStateOf(false)
+    }
+
+    LaunchedEffect(locationName) {
+        if (locationName != null) {
+            viewModel.getSelectedWeather(locationName)
+
+            //Clear value from the savedStateHandle
+            navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.remove<String>(AppNavKeys.LOCATION_NAME)
+        }
     }
 
     Scaffold(
@@ -276,7 +291,9 @@ private fun CurrentWeather(
     ) {
         Text(
             text = location,
-            fontSize = 55.sp,
+            fontSize = 35.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
         Text(
             text = currentTemp,

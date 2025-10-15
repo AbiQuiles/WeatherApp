@@ -30,14 +30,19 @@ fun AppNavigation() {
 //!! Might Change
 //Currently Not Used - Went with Android Default Icon Splash Screen
 private fun NavGraphBuilder.splashScreen(navController: NavController) {
-    composable(route = AppRoutes.SplashScreen.name,) {
+    composable(route = AppRoutes.SplashScreen.name) {
         WeatherSplashScreen(navController = navController)
     }
 }
 
 private fun NavGraphBuilder.mainScreen(navController: NavController) {
-    composable(route = AppRoutes.MainScreen.name) {
-        WeatherScreen(navController = navController)
+    composable(route = AppRoutes.MainScreen.name) { navBackStackEntry ->
+        val locationName: String? = navBackStackEntry.savedStateHandle.get<String>(AppNavKeys.LOCATION_NAME)
+
+        WeatherScreen(
+            navController = navController,
+            locationName = locationName
+        )
     }
 }
 
