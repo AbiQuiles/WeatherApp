@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization) //Kotlin Serialization
     alias(libs.plugins.devtool.ksp) //Kotlin Annotation Precessing Tool
     alias(libs.plugins.dagger.hilt) //Hilt
     alias(libs.plugins.android.room) //Room
@@ -66,6 +67,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation (libs.kotlinx.coroutines.play.services)
     implementation(libs.androidx.lifecycle.viewmodel)// Coroutines Lifecycle Scope
+
+    //Kotlin Serialization Json
+    implementation(libs.kotlinx.serialization.json)
 
     //Room
     implementation(libs.room.runtime.android)

@@ -18,6 +18,7 @@ hiltNavigation = "1.2.0"
 roomAndroid = "2.7.2"
 
 ksp = "2.1.21-2.0.1"
+kotlinSerialization = "1.9.0"
 agp = "8.11.0"
 kotlin = "2.2.0"
 coreKtx = "1.16.0"
@@ -31,6 +32,7 @@ composeBom = "2024.09.00"
 [libraries]
 androidx-material-icons-core = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIcons" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidViewmodelCompose" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerialization" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
@@ -69,6 +71,7 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 
 [plugins]
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinSerialization"}
 devtool-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "daggerHilt" }
 
