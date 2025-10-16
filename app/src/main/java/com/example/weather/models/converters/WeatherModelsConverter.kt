@@ -1,6 +1,7 @@
 package com.example.weather.models.converters
 
 import android.annotation.SuppressLint
+import com.example.weather.models.data.location.LocationDto
 import com.example.weather.models.data.location.LocationSavedEntity
 import com.example.weather.models.data.location.LocationSupportedEntity
 import com.example.weather.models.data.weather.WeatherDto
@@ -58,7 +59,7 @@ class WeatherModelsConverter {
     fun savedEntityToSavedItemUiState(entities: List<LocationSavedEntity>): MutableList<SavedItemUiState> {
         val savedItemUiStateList = mutableListOf<SavedItemUiState>()
 
-        entities.forEach {entity ->
+        entities.forEach { entity ->
 
             savedItemUiStateList.add(
                 SavedItemUiState(name = entity.name)
@@ -74,6 +75,18 @@ class WeatherModelsConverter {
         entities.forEach { entity ->
             searchItemUiStateList.add(
                 SearchItemUiState(name = entity.name)
+            )
+        }
+
+        return searchItemUiStateList
+    }
+
+    fun supportedDtoToSearchItemUiState(locationDtoList: List<LocationDto>): List<SearchItemUiState> {
+        val searchItemUiStateList = mutableListOf<SearchItemUiState>()
+
+        locationDtoList.forEach { dto ->
+            searchItemUiStateList.add(
+                SearchItemUiState(name = dto.name)
             )
         }
 

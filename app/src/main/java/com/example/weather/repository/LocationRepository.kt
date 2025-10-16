@@ -1,9 +1,16 @@
 package com.example.weather.repository
 
 import android.content.Context
+import android.util.Log
+import com.example.weather.models.data.location.LocationDto
 import com.example.weather.models.data.location.LocationSavedEntity
 import com.example.weather.models.data.location.LocationSupportedEntity
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.IOException
+import java.io.InputStreamReader
 import javax.inject.Inject
 
 class LocationRepository @Inject constructor(
@@ -61,16 +68,14 @@ class LocationRepository @Inject constructor(
         LocationSupportedEntity(name = "Ocoee"),
     )
 
-
     private val INPUT_FILE_NAME = "locations_list.json"
     private val TAG = "LocationRepository"
 
-/*    suspend fun getAllLocationNamesWithGson(): List<String> {
-        val namesList = mutableListOf<String>()
+    suspend fun getAllLocationNamesWithGson(): List<LocationDto> {
+        val namesList: MutableList<LocationDto> = mutableListOf()
 
         withContext(Dispatchers.IO) {
             try {
-                // 2. Open the asset file and create an InputStreamReader
                 context.assets.open(INPUT_FILE_NAME).use { inputStream ->
                     val inputStreamReader = InputStreamReader(inputStream, Charsets.UTF_8)
 
@@ -80,8 +85,7 @@ class LocationRepository @Inject constructor(
                     // 4. Deserialize the entire JSON file into a List<Location>
                     val locations: List<LocationDto> = gson.fromJson(inputStreamReader, listType)
 
-                    // 5. Extract just the names using Kotlin's 'map' function
-                    namesList.addAll(locations.map { it.name })
+                    namesList.addAll(locations.map { LocationDto(name = it.name) })
                 }
             } catch (ioE: IOException) {
                 Log.e(TAG, "IOException while parsing asset file: ${ioE.message}", ioE)
@@ -91,5 +95,5 @@ class LocationRepository @Inject constructor(
         }
 
         return namesList
-    }*/
+    }
 }
