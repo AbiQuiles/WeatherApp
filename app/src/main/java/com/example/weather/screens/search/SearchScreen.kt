@@ -172,7 +172,7 @@ private fun SavedItem(savedItem: SavedItemUiState) {
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "200°",
+                    text = "${savedItem.currentTemp}°",
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -184,11 +184,11 @@ private fun SavedItem(savedItem: SavedItemUiState) {
                     .padding(vertical = 4.dp, horizontal = 6.dp)
             ) {
                 Text(
-                    text = "Sunny",
+                    text = savedItem.descriptionTemp,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "L: ${savedItem.highAndLowTemp.first} |  H: ${savedItem.highAndLowTemp.second}°",
+                    text = "L: ${savedItem.lowAndHighTemp.first}° |  H: ${savedItem.lowAndHighTemp.second}°",
                     fontWeight = FontWeight.Medium
                 )
             }

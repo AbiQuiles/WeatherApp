@@ -62,7 +62,12 @@ class WeatherModelsConverter {
         entities.forEach { entity ->
 
             savedItemUiStateList.add(
-                SavedItemUiState(name = entity.name)
+                SavedItemUiState(
+                    name = entity.name,
+                    descriptionTemp = entity.descriptionTemp,
+                    currentTemp = entity.currentTemp,
+                    lowAndHighTemp = Pair(entity.minTemp, entity.maxTemp)
+                )
             )
         }
 

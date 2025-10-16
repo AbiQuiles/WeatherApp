@@ -11,8 +11,14 @@ data class LocationSavedEntity(
     val id: UUID = UUID.randomUUID(),
     @ColumnInfo(name = "location_name")
     val name: String,
-    @ColumnInfo(name = "maxTemp")
+    @ColumnInfo(name = "description_temp")
+    val descriptionTemp: String,
+    @ColumnInfo(name = "current_temp")
+    val currentTemp: String,
+    @ColumnInfo(name = "max_temp")
     val maxTemp: String,
-    @ColumnInfo(name = "minTemp")
+    @ColumnInfo(name = "min_temp")
     val minTemp: String
 )
+
+//TODO: Think through this entity still. What properties are we going to be saving?

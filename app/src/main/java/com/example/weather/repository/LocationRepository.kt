@@ -20,42 +20,69 @@ class LocationRepository @Inject constructor(
     val _mockLocationSaved: List<LocationSavedEntity> = listOf(
         LocationSavedEntity(
             name = "Orlando",
-            maxTemp = "-65",
-            minTemp = "102+"
+            descriptionTemp = "Sunny",
+            currentTemp = "75",
+            minTemp = "65",
+            maxTemp = "102"
         ),
-        LocationSavedEntity(name = "Altamonte Springs",
-            maxTemp = "-65",
-            minTemp = "102+"
+        LocationSavedEntity(
+            name = "Altamonte Springs",
+            descriptionTemp = "Rainy",
+            currentTemp = "85",
+            minTemp = "65",
+            maxTemp = "102"
         ),
-        LocationSavedEntity(name = "Wekiva Springs",
-            maxTemp = "-65",
-            minTemp = "102+"
+        LocationSavedEntity(
+            name = "Wekiva Springs",
+            descriptionTemp = "Mostly Sunny",
+            currentTemp = "95",
+            minTemp = "65",
+            maxTemp = "102"
         ),
-        LocationSavedEntity(name = "Apopka",
-            maxTemp = "-65",
-            minTemp = "102+"
+        LocationSavedEntity(
+            name = "Apopka",
+            descriptionTemp = "Cloudy ",
+            currentTemp = "105",
+            minTemp = "65",
+            maxTemp = "102"
         ),
-        LocationSavedEntity(name = "Maitland",
-            maxTemp = "-65",
-            minTemp = "102+"
+        LocationSavedEntity(
+            name = "Maitland",
+            descriptionTemp = "Sunny",
+            currentTemp = "90",
+            minTemp = "65",
+            maxTemp = "102"
         ),
-        LocationSavedEntity(name = "Winter Park",
-            maxTemp = "-65",
-            minTemp = "102+"
+        LocationSavedEntity(
+            name = "Winter Park",
+            descriptionTemp = "Rainy",
+            currentTemp = "70",
+            minTemp = "65",
+            maxTemp = "102"
         ),
-        LocationSavedEntity(name = "Miami",
-            maxTemp = "-65",
-            minTemp = "102+"
+        LocationSavedEntity(
+            name = "Miami",
+            descriptionTemp = "Sunny",
+            currentTemp = "60",
+            minTemp = "65",
+            maxTemp = "102"
         ),
-        LocationSavedEntity(name = "Clermont",
-            maxTemp = "-65",
-            minTemp = "102+"
+        LocationSavedEntity(
+            name = "Clermont",
+            descriptionTemp = "Cloudy",
+            currentTemp = "75",
+            minTemp = "65",
+            maxTemp = "102"
         ),
-        LocationSavedEntity(name = "Ocoee",
-            maxTemp = "-65",
-            minTemp = "102+"
+        LocationSavedEntity(
+            name = "Ocoee",
+            descriptionTemp = "Most Sunny",
+            currentTemp = "95",
+            minTemp = "65",
+            maxTemp = "102"
         ),
     )
+
     val _mockLocationsSupported: List<LocationSupportedEntity> = listOf(
         LocationSupportedEntity(name = "Orlando"),
         LocationSupportedEntity(name = "Altamonte Springs"),
