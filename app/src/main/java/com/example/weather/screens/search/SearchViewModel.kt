@@ -3,12 +3,12 @@ package com.example.weather.screens.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weather.models.converters.WeatherModelsConverter
-import com.example.weather.models.data.location.LocationSupportedDto
 import com.example.weather.models.data.location.LocationSavedEntity
 import com.example.weather.models.data.location.LocationSupportedEntity
 import com.example.weather.models.ui.search.SearchListUiState
 import com.example.weather.models.ui.search.searchbar.SearchBarUiState
-import com.example.weather.repository.LocationRepository
+import com.example.weather.repository.LocationSavedRepository
+import com.example.weather.repository.LocationSupportedRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,11 +19,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val repository: LocationRepository,
+    private val savedRepository: LocationSavedRepository,
+    private val supportedRepository: LocationSupportedRepository,
     private val converter: WeatherModelsConverter
 ) : ViewModel() {
-    private val _cachedJsonLocations: MutableList<LocationSupportedDto> = mutableListOf()
-
     private val _cachedSavedLocations: MutableList<LocationSavedEntity> = mutableListOf()
     private val _cachedSupportedLocations: MutableList<LocationSupportedEntity> = mutableListOf()
 
@@ -36,7 +35,7 @@ class SearchViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             launch {
-                _cachedSavedLocations.addAll(repository._mockLocationSaved)
+                _cachedSavedLocations.addAll(savedRepository._mockLocationSaved)
 
                 _searchListUiState.update { searchList ->
                     searchList.copy(
@@ -45,26 +44,24 @@ class SearchViewModel @Inject constructor(
                 }
             }
 
-            /*launch {
-               _cachedSupportedLocations.addAll(repository._mockLocationsSupported)
-            }*/
-
             launch {
-                _cachedJsonLocations.addAll(repository.getAllLocationNamesWithGson())
+                supportedRepository.getAllLocationSupported().collect { entities ->
+                    _cachedSupportedLocations.addAll(entities)
+                }
             }
         }
     }
 
-    private fun logSupportedLocations() {
-        _cachedJsonLocations.forEach {
+    /*private fun logSupportedLocations() {
+        _cachedSupportedLocations.forEach {
             println("Rez json ${it.name}")
         }
-    }
+    }*/
 
     fun getSearch(query: String) {
         val result = if(query.isNotBlank()) {
-            converter.supportedDtoToSearchItemUiState(
-                _cachedJsonLocations.filter { supportedEntity ->
+            converter.supportedEntityToSearchItemUiState(
+                _cachedSupportedLocations.filter { supportedEntity ->
                     supportedEntity.name.startsWith(query, true)
                 }
             )

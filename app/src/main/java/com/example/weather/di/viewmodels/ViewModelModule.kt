@@ -9,7 +9,7 @@ import dagger.hilt.android.scopes.ViewModelScoped
 
 @InstallIn(ViewModelComponent::class)
 @Module
-object WeatherViewModelModule {
+object ViewModelModule {
 
     @Provides
     @ViewModelScoped
