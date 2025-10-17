@@ -4,10 +4,13 @@ package com.example.weather.screens.search
  import androidx.compose.foundation.layout.Arrangement
  import androidx.compose.foundation.layout.Column
  import androidx.compose.foundation.layout.Row
+ import androidx.compose.foundation.layout.WindowInsets
  import androidx.compose.foundation.layout.fillMaxSize
  import androidx.compose.foundation.layout.fillMaxWidth
  import androidx.compose.foundation.layout.padding
  import androidx.compose.foundation.layout.size
+ import androidx.compose.foundation.layout.systemBars
+ import androidx.compose.foundation.layout.windowInsetsPadding
  import androidx.compose.foundation.lazy.LazyColumn
  import androidx.compose.foundation.lazy.items
  import androidx.compose.material.icons.Icons
@@ -15,13 +18,19 @@ package com.example.weather.screens.search
  import androidx.compose.material.icons.filled.LocationOn
  import androidx.compose.material.icons.rounded.Search
  import androidx.compose.material3.Card
+ import androidx.compose.material3.ExperimentalMaterial3Api
  import androidx.compose.material3.Icon
  import androidx.compose.material3.MaterialTheme
+ import androidx.compose.material3.ModalBottomSheet
  import androidx.compose.material3.Scaffold
  import androidx.compose.material3.Text
+ import androidx.compose.material3.rememberModalBottomSheetState
  import androidx.compose.runtime.Composable
  import androidx.compose.runtime.collectAsState
  import androidx.compose.runtime.getValue
+ import androidx.compose.runtime.mutableStateOf
+ import androidx.compose.runtime.remember
+ import androidx.compose.runtime.setValue
  import androidx.compose.ui.Alignment
  import androidx.compose.ui.Modifier
  import androidx.compose.ui.graphics.vector.ImageVector
@@ -35,12 +44,14 @@ package com.example.weather.screens.search
  import com.example.weather.models.ui.search.SearchItemUiState
  import com.example.weather.models.ui.search.SearchListUiState
  import com.example.weather.models.ui.search.searchbar.SearchBarEvents
- import com.example.weather.navigation.AppNavKeys
+ import com.example.weather.screens.main.WeatherModalScreen
 
 @Composable
 fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel = hiltViewModel()) {
     val searchBarUiState by viewModel.searchBarUiState.collectAsState()
     val searchResultListUiState by viewModel.searchListUiState.collectAsState()
+    var showBottomSheetState by remember { mutableStateOf(false) }
+    var locationSelectedState by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -57,27 +68,46 @@ fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel
         containerColor = MaterialTheme.colorScheme.surface
     ) { innerPadding ->
         MainLayout(
+            modifier = Modifier.padding(innerPadding),
             searchListUiState = searchResultListUiState,
             searchText = searchBarUiState.searchText,
-            onLocationClick = { locationClicked ->
+            onShowBottomSheet = { showBottomSheetState = it },
+            onLocationSelected = { locationSelected ->
+                locationSelectedState = locationSelected
 
-                navController.previousBackStackEntry
+                /*navController.previousBackStackEntry
                     ?.savedStateHandle
                     ?.set(AppNavKeys.LOCATION_NAME, locationClicked)
 
-                navController.popBackStack()
+                navController.popBackStack()*/
             },
-            modifier = Modifier.padding(innerPadding)
-        )
+        ) {
+
+            if (showBottomSheetState) {
+                if (locationSelectedState.isNotBlank()) {
+                    WeatherModal(onShowBottomSheet = { showBottomSheetState = false }) {
+                        WeatherModalScreen(
+                            locationName = locationSelectedState
+                        )
+                    }
+                } else {
+                    WeatherModal(onShowBottomSheet = { showBottomSheetState = false }) {
+                        Text("There was an issue loading this location.")
+                    }
+                }
+            }
+        }
     }
 }
 
 @Composable
 private fun MainLayout(
+    modifier: Modifier = Modifier,
     searchListUiState: SearchListUiState,
     searchText: String,
-    onLocationClick: (String) -> Unit,
-    modifier: Modifier = Modifier,
+    onLocationSelected: (String) -> Unit,
+    onShowBottomSheet: (Boolean) -> Unit,
+    modalBottomSheet: @Composable () -> Unit
 ) {
     val searchItems = searchListUiState.items
 
@@ -88,6 +118,9 @@ private fun MainLayout(
             .fillMaxSize()
             .padding(4.dp)
     ) {
+
+        modalBottomSheet()
+
         if (searchItems.isNotEmpty()) {
             LazyColumn (
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -101,7 +134,8 @@ private fun MainLayout(
                         SavedItem(savedItem = item)
                     } else if (searchText.isNotEmpty() && item is SearchItemUiState) {
                         SearchedItem(searchItem = item) { locationClicked ->
-                            onLocationClick(locationClicked)
+                            onLocationSelected(locationClicked)
+                            onShowBottomSheet(true)
                         }
                     }
                 }
@@ -205,8 +239,8 @@ private fun SearchedItem(searchItem: SearchItemUiState, onLocationClick: (String
             .fillMaxWidth()
             .padding(12.dp)
             .clickable(onClick = {
-            onLocationClick(searchItem.name)
-        })
+                onLocationClick(searchItem.name)
+            })
     ) {
         Icon(
             imageVector = Icons.Rounded.Search,
@@ -220,6 +254,25 @@ private fun SearchedItem(searchItem: SearchItemUiState, onLocationClick: (String
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun WeatherModal(onShowBottomSheet: (Boolean) -> Unit, weatherComponent: @Composable () -> Unit) {
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+
+    ModalBottomSheet(
+        onDismissRequest = { onShowBottomSheet(false) },
+        sheetState = sheetState,
+        shape = MaterialTheme.shapes.small,
+        modifier = Modifier
+            .padding(top = 20.dp)
+            .windowInsetsPadding(WindowInsets.systemBars)
+    ) {
+        weatherComponent()
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun MainLayoutWithSavedItemsPreview() {
@@ -230,7 +283,9 @@ private fun MainLayoutWithSavedItemsPreview() {
     MainLayout(
         searchListUiState = mockSearchListUiState,
         searchText = "",
-        onLocationClick = {}
+        onLocationSelected = {},
+        onShowBottomSheet = { false },
+        modalBottomSheet = { }
     )
 }
 
@@ -244,7 +299,9 @@ private fun MainLayoutWithSearchItemsPreview() {
     MainLayout(
         searchListUiState = mockSearchListUiState,
         searchText = "Not Empty",
-        onLocationClick = {}
+        onLocationSelected = {},
+        onShowBottomSheet = { false },
+        modalBottomSheet = { }
     )
 }
 
@@ -254,7 +311,9 @@ private fun MainLayoutWithNoSaveViewPreview() {
     MainLayout(
         searchListUiState = SearchListUiState(),
         searchText = "",
-        onLocationClick = {}
+        onLocationSelected = {},
+        onShowBottomSheet = { false },
+        modalBottomSheet = { }
     )
 }
 
@@ -264,7 +323,9 @@ private fun MainLayoutWithNoResultViewPreview() {
     MainLayout(
         searchListUiState = SearchListUiState(),
         searchText = "Location",
-        onLocationClick = {}
+        onLocationSelected = {},
+        onShowBottomSheet = { false },
+        modalBottomSheet = { }
     )
 }
 
@@ -276,11 +337,18 @@ private fun SearchedItemPreview() {
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 private fun SavedItemPreview() {
     SavedItem(
         savedItem = SavedItemUiState()
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun WeatherModalPreview() {
+    WeatherModal(onShowBottomSheet = { true }) {
+        WeatherModalScreen(locationName = "Orlando")
+    }
 }

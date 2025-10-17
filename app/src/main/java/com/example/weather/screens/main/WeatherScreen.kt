@@ -102,6 +102,38 @@ fun WeatherScreen(
 }
 
 @Composable
+fun WeatherModalScreen(
+    viewModel: WeatherViewModel = hiltViewModel(),
+    locationName: String?
+) {
+    val currentWeatherUiState by viewModel.currentWeatherUiState.collectAsState()
+    val dailyForecastItemUiState by viewModel.dailyForecastItemUiState.collectAsState()
+    val loadingState by remember(currentWeatherUiState) {
+        if (currentWeatherUiState == null)
+            mutableStateOf(true)
+        else
+            mutableStateOf(false)
+    }
+
+    LaunchedEffect(locationName) {
+        if (locationName != null) {
+            viewModel.getSelectedWeather(locationName)
+        }
+    }
+
+    Scaffold(
+        topBar = { }
+    ) { innerPadding ->
+        MainLayout(
+            currentWeatherUiState = currentWeatherUiState,
+            dailyForecastItemUiState = dailyForecastItemUiState,
+            loadingState = loadingState,
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
+}
+
+@Composable
 private fun TopAppBar(navController: NavController) {
     TopBar(
         title = "Weather",
