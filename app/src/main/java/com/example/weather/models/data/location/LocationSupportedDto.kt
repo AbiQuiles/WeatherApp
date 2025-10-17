@@ -1,5 +1,5 @@
 package com.example.weather.models.data.location
 
-data class LocationDto(
+data class LocationSupportedDto(
     val name: String
 )

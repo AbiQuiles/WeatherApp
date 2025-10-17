@@ -2,7 +2,7 @@ package com.example.weather.repository
 
 import android.content.Context
 import android.util.Log
-import com.example.weather.models.data.location.LocationDto
+import com.example.weather.models.data.location.LocationSupportedDto
 import com.example.weather.models.data.location.LocationSavedEntity
 import com.example.weather.models.data.location.LocationSupportedEntity
 import com.google.gson.Gson
@@ -98,8 +98,8 @@ class LocationRepository @Inject constructor(
     private val INPUT_FILE_NAME = "locations_list.json"
     private val TAG = "LocationRepository"
 
-    suspend fun getAllLocationNamesWithGson(): List<LocationDto> {
-        val namesList: MutableList<LocationDto> = mutableListOf()
+    suspend fun getAllLocationNamesWithGson(): List<LocationSupportedDto> {
+        val namesList: MutableList<LocationSupportedDto> = mutableListOf()
 
         withContext(Dispatchers.IO) {
             try {
@@ -107,12 +107,12 @@ class LocationRepository @Inject constructor(
                     val inputStreamReader = InputStreamReader(inputStream, Charsets.UTF_8)
 
                     // 3. Define the target type: a List of Location objects
-                    val listType = object : TypeToken<List<LocationDto>>() {}.type
+                    val listType = object : TypeToken<List<LocationSupportedDto>>() {}.type
 
                     // 4. Deserialize the entire JSON file into a List<Location>
-                    val locations: List<LocationDto> = gson.fromJson(inputStreamReader, listType)
+                    val locations: List<LocationSupportedDto> = gson.fromJson(inputStreamReader, listType)
 
-                    namesList.addAll(locations.map { LocationDto(name = it.name) })
+                    namesList.addAll(locations.map { LocationSupportedDto(name = it.name) })
                 }
             } catch (ioE: IOException) {
                 Log.e(TAG, "IOException while parsing asset file: ${ioE.message}", ioE)

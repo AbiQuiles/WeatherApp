@@ -3,7 +3,7 @@ package com.example.weather.screens.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weather.models.converters.WeatherModelsConverter
-import com.example.weather.models.data.location.LocationDto
+import com.example.weather.models.data.location.LocationSupportedDto
 import com.example.weather.models.data.location.LocationSavedEntity
 import com.example.weather.models.data.location.LocationSupportedEntity
 import com.example.weather.models.ui.search.SearchListUiState
@@ -22,7 +22,7 @@ class SearchViewModel @Inject constructor(
     private val repository: LocationRepository,
     private val converter: WeatherModelsConverter
 ) : ViewModel() {
-    private val _cachedJsonLocations: MutableList<LocationDto> = mutableListOf()
+    private val _cachedJsonLocations: MutableList<LocationSupportedDto> = mutableListOf()
 
     private val _cachedSavedLocations: MutableList<LocationSavedEntity> = mutableListOf()
     private val _cachedSupportedLocations: MutableList<LocationSupportedEntity> = mutableListOf()
@@ -52,6 +52,12 @@ class SearchViewModel @Inject constructor(
             launch {
                 _cachedJsonLocations.addAll(repository.getAllLocationNamesWithGson())
             }
+        }
+    }
+
+    private fun logSupportedLocations() {
+        _cachedJsonLocations.forEach {
+            println("Rez json ${it.name}")
         }
     }
 
