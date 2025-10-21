@@ -25,7 +25,7 @@ import com.example.weather.R
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun TopBar(
+fun WeatherScreenTopBar(
     title: String = "",
     onExitRoute: () -> Unit = {},
     isMainScreen: Boolean = false,
@@ -67,22 +67,37 @@ fun TopBar(
     )
 }
 
-@Preview
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun WeatherModalTopBar(customActions: @Composable () -> Unit = {}) {
+    TopAppBar(
+        title = {},
+        colors =  TopAppBarDefaults.topAppBarColors(MaterialTheme.colorScheme.background),
+        actions = { customActions() }
+    )
+}
+
+@Preview(showBackground = true)
 @Composable
 private fun TopAppBarMainPreview() {
-    TopBar(
+    WeatherScreenTopBar(
         title = "Main",
         onExitRoute = {},
         isMainScreen = true
     )
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun TopAppBarPreview() {
-    TopBar(
+    WeatherScreenTopBar(
         title = "Not Main",
         onExitRoute = {},
     )
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun WeatherModalTopBarPreview() {
+    WeatherModalTopBar()
+}

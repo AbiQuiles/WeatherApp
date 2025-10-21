@@ -46,6 +46,7 @@ package com.example.weather.screens.search
  import com.example.weather.models.ui.search.searchbar.SearchBarEvents
  import com.example.weather.screens.main.WeatherModalScreen
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel = hiltViewModel()) {
     val searchBarUiState by viewModel.searchBarUiState.collectAsState()
@@ -82,16 +83,24 @@ fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel
                 navController.popBackStack()*/
             },
         ) {
-
             if (showBottomSheetState) {
-                if (locationSelectedState.isNotBlank()) {
-                    WeatherModal(onShowBottomSheet = { showBottomSheetState = false }) {
+                val sheetState = rememberModalBottomSheetState(
+                    skipPartiallyExpanded = true
+                )
+
+                ModalBottomSheet(
+                    onDismissRequest = { showBottomSheetState = false  },
+                    sheetState = sheetState,
+                    shape = MaterialTheme.shapes.small,
+                    modifier = Modifier
+                        .padding(top = 20.dp)
+                        .windowInsetsPadding(WindowInsets.systemBars)
+                ) {
+                    if (locationSelectedState.isNotBlank()) {
                         WeatherModalScreen(
                             locationName = locationSelectedState
                         )
-                    }
-                } else {
-                    WeatherModal(onShowBottomSheet = { showBottomSheetState = false }) {
+                    } else {
                         Text("There was an issue loading this location.")
                     }
                 }
@@ -254,25 +263,6 @@ private fun SearchedItem(searchItem: SearchItemUiState, onLocationClick: (String
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun WeatherModal(onShowBottomSheet: (Boolean) -> Unit, weatherComponent: @Composable () -> Unit) {
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
-
-    ModalBottomSheet(
-        onDismissRequest = { onShowBottomSheet(false) },
-        sheetState = sheetState,
-        shape = MaterialTheme.shapes.small,
-        modifier = Modifier
-            .padding(top = 20.dp)
-            .windowInsetsPadding(WindowInsets.systemBars)
-    ) {
-        weatherComponent()
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun MainLayoutWithSavedItemsPreview() {
@@ -343,12 +333,4 @@ private fun SavedItemPreview() {
     SavedItem(
         savedItem = SavedItemUiState()
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun WeatherModalPreview() {
-    WeatherModal(onShowBottomSheet = { true }) {
-        WeatherModalScreen(locationName = "Orlando")
-    }
 }

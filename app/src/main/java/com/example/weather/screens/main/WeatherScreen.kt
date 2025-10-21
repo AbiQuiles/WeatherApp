@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ManageSearch
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LocationOn
@@ -28,6 +29,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -59,7 +61,8 @@ import com.example.weather.navigation.AppNavKeys
 import com.example.weather.navigation.AppRoutes
 import com.example.weather.widgets.FloatingModal
 import com.example.weather.widgets.SwitcherRow
-import com.example.weather.widgets.TopBar
+import com.example.weather.widgets.WeatherModalTopBar
+import com.example.weather.widgets.WeatherScreenTopBar
 
 @Composable
 fun WeatherScreen(
@@ -89,7 +92,7 @@ fun WeatherScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(navController = navController)
+            WeatherTopBar(navController = navController)
         }
     ) { innerPadding ->
             MainLayout(
@@ -104,7 +107,7 @@ fun WeatherScreen(
 @Composable
 fun WeatherModalScreen(
     viewModel: WeatherViewModel = hiltViewModel(),
-    locationName: String?
+    locationName: String
 ) {
     val currentWeatherUiState by viewModel.currentWeatherUiState.collectAsState()
     val dailyForecastItemUiState by viewModel.dailyForecastItemUiState.collectAsState()
@@ -116,13 +119,15 @@ fun WeatherModalScreen(
     }
 
     LaunchedEffect(locationName) {
-        if (locationName != null) {
-            viewModel.getSelectedWeather(locationName)
-        }
+        viewModel.getSelectedWeather(locationName)
     }
 
     Scaffold(
-        topBar = { }
+        topBar = {
+            ModalTopBar(
+                onSave = { viewModel.saveLocationByName(onSave = it) }
+            )
+        }
     ) { innerPadding ->
         MainLayout(
             currentWeatherUiState = currentWeatherUiState,
@@ -134,8 +139,8 @@ fun WeatherModalScreen(
 }
 
 @Composable
-private fun TopAppBar(navController: NavController) {
-    TopBar(
+private fun WeatherTopBar(navController: NavController) {
+    WeatherScreenTopBar(
         title = "Weather",
         isMainScreen = true,
         customActions = {
@@ -153,7 +158,34 @@ private fun TopAppBar(navController: NavController) {
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
+private fun ModalTopBar(onSave: (Boolean) -> Unit) {
+    WeatherModalTopBar(
+        customActions = {
+            SaveButton {
+                onSave(it)
+            }
+        }
+    )
+}
+
+@Composable
+private fun SaveButton(onSave: (Boolean) -> Unit) {
+    IconButton(
+        onClick = { onSave(true) },
+        colors = IconButtonDefaults.iconButtonColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Add,
+            contentDescription = "Saved Icon",
+            modifier = Modifier.size(25.dp)
+        )
+    }
+}
+
+@Composable
 private fun SearchButton(navigate: () -> Unit) {
     IconButton(
         onClick = {
@@ -166,7 +198,6 @@ private fun SearchButton(navigate: () -> Unit) {
         )
     }
 }
-
 
 @Composable
 private fun MinimalDropdownMenu() {
@@ -460,7 +491,13 @@ private fun CurrentWeatherImage(forecastUrlImage: String) {
 @Composable
 private fun TopAppBarPreview() {
     val fakeNaveController = NavHostController(LocalContext.current)
-    TopAppBar(navController = fakeNaveController)
+    WeatherTopBar(navController = fakeNaveController)
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ModalTopAppBarPreview() {
+    ModalTopBar(onSave = {} )
 }
 
 @Preview(showBackground = true)

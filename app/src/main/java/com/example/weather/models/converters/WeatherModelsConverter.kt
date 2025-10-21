@@ -55,11 +55,10 @@ class WeatherModelsConverter {
 
     /** Search Section Converter*/
 
-    fun savedEntityToSavedItemUiState(entities: List<LocationSavedEntity>): MutableList<SavedItemUiState> {
+    fun savedEntityToSavedItemUiState(entities: Set<LocationSavedEntity>): MutableList<SavedItemUiState> {
         val savedItemUiStateList = mutableListOf<SavedItemUiState>()
 
         entities.forEach { entity ->
-
             savedItemUiStateList.add(
                 SavedItemUiState(
                     name = entity.name,
