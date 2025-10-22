@@ -42,6 +42,7 @@ package com.example.weather.screens.search
  import androidx.navigation.NavController
  import com.example.weather.models.ui.search.SavedItemUiState
  import com.example.weather.models.ui.search.SearchItemUiState
+ import com.example.weather.models.ui.search.SearchListItem
  import com.example.weather.models.ui.search.SearchListUiState
  import com.example.weather.models.ui.search.searchbar.SearchBarEvents
  import com.example.weather.screens.main.WeatherModalScreen
@@ -118,7 +119,7 @@ private fun MainLayout(
     onShowBottomSheet: (Boolean) -> Unit,
     modalBottomSheet: @Composable () -> Unit
 ) {
-    val searchItems = searchListUiState.items
+    val searchItems: List<SearchListItem> = searchListUiState.items.toList()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -267,7 +268,7 @@ private fun SearchedItem(searchItem: SearchItemUiState, onLocationClick: (String
 @Composable
 private fun MainLayoutWithSavedItemsPreview() {
     val mockSearchListUiState = SearchListUiState(
-        items = listOf(SavedItemUiState())
+        items = setOf(SavedItemUiState())
     )
 
     MainLayout(
@@ -283,7 +284,7 @@ private fun MainLayoutWithSavedItemsPreview() {
 @Composable
 private fun MainLayoutWithSearchItemsPreview() {
     val mockSearchListUiState = SearchListUiState(
-        items = listOf(SearchItemUiState())
+        items = setOf(SearchItemUiState())
     )
 
     MainLayout(

@@ -2,22 +2,43 @@ package com.example.weather.repository
 
 import android.util.Log
 import com.example.weather.models.data.weather.WeatherDto
-import com.example.weather.util.data.DataOrException
+import com.example.weather.models.mappers.toUiModel
+import com.example.weather.models.ui.weather.CurrentWeatherUiState
+import com.example.weather.models.ui.weather.DailyForecastItemUiState
+import com.example.weather.models.ui.weather.WeatherScreenUiState
 import com.example.weather.network.WeatherApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class WeatherRepository @Inject constructor(private val api: WeatherApi) {
 
-    suspend fun getWeather(cityQuery: String): DataOrException<WeatherDto, Exception> {
-        val response = try {
-            api.getWeather(query = cityQuery)
+    fun getWeather(locationQuery: String): Flow<WeatherScreenUiState> = flow {
+        emit(WeatherScreenUiState(isLoading = true))
+
+        try {
+            val weatherDto: WeatherDto = api.getWeather(query = locationQuery)
+            val currentWeatherUiState: CurrentWeatherUiState = weatherDto.toUiModel()
+            val dailyForecastItemUiStates: List<DailyForecastItemUiState> = weatherDto.list
+                .slice(1..6).map { weatherLargeDto ->
+                    weatherLargeDto.toUiModel()
+                }
+
+            Log.d("WeatherRepository", "Fetch & Map Success for $locationQuery")
+
+            emit(WeatherScreenUiState(
+                isLoading = false,
+                currentWeather = currentWeatherUiState,
+                weekWeekForecast = dailyForecastItemUiStates
+            ))
 
         } catch (e: Exception) {
-            Log.e("WeatherRepository", "Error: $e")
-            return DataOrException(e = e)
-        }
+            Log.e("WeatherRepository", "API Error: ${e.message}", e)
 
-        Log.d("WeatherRepository", "Fetch Success: $response")
-        return DataOrException(data = response)
+            emit(WeatherScreenUiState(
+                isLoading = false,
+                isError = true
+            ))
+        }
     }
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.example.weather.models.data.location.LocationSupportedDto
 import com.example.weather.models.data.location.LocationSupportedEntity
+import com.example.weather.models.mappers.toEntity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
@@ -24,8 +25,12 @@ class WeatherDatabaseInitializer @Inject constructor(
         //Check if the DB has been already populated
         if (locationSupportedDao.count() == 0) {
             val dtoList: List<LocationSupportedDto> = getLocationSupportedDTOs()
+
             if (dtoList.isNotEmpty()) {
-                val entities: List<LocationSupportedEntity> = dtoList.map { dto -> LocationSupportedEntity(name = dto.name) }
+                val entities: List<LocationSupportedEntity> = dtoList.map { locationSupportedDto: LocationSupportedDto ->
+                    locationSupportedDto.toEntity()
+                }
+
                 locationSupportedDao.insertAll(entities)
                 Log.d(TAG, "Successfully populated ${entities.size} locations.")
             }

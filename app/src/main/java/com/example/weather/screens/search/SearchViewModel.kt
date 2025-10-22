@@ -2,9 +2,9 @@ package com.example.weather.screens.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.weather.models.converters.WeatherModelsConverter
-import com.example.weather.models.data.location.LocationSavedEntity
-import com.example.weather.models.data.location.LocationSupportedEntity
+import com.example.weather.models.ui.search.SavedItemUiState
+import com.example.weather.models.ui.search.SearchItemUiState
+import com.example.weather.models.ui.search.SearchListItem
 import com.example.weather.models.ui.search.SearchListUiState
 import com.example.weather.models.ui.search.searchbar.SearchBarUiState
 import com.example.weather.repository.LocationSavedRepository
@@ -23,10 +23,9 @@ import javax.inject.Inject
 class SearchViewModel @Inject constructor(
     private val savedRepository: LocationSavedRepository,
     private val supportedRepository: LocationSupportedRepository,
-    private val converter: WeatherModelsConverter
 ) : ViewModel() {
-    private val _cachedSavedLocations: MutableSet<LocationSavedEntity> = mutableSetOf()
-    private val _cachedSupportedLocations: MutableSet<LocationSupportedEntity> = mutableSetOf()
+    private val _cachedSavedLocations: MutableSet<SavedItemUiState> = mutableSetOf()
+    private val _cachedSupportedLocations: MutableSet<SearchItemUiState> = mutableSetOf()
 
     private val _searchBarUiState: MutableStateFlow<SearchBarUiState> = MutableStateFlow(SearchBarUiState())
     val searchBarUiState: StateFlow<SearchBarUiState> = _searchBarUiState.asStateFlow()
@@ -36,46 +35,45 @@ class SearchViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+
             launch(Dispatchers.IO) {
                 savedRepository.getAllLocations()
                     .distinctUntilChanged()
-                    .collect { savedEntities ->
-                        _cachedSavedLocations.addAll(savedEntities)
+                    .collect { savedItemUiStates ->
+                        _cachedSavedLocations.addAll(savedItemUiStates)
                     }
             }
 
             launch(Dispatchers.Main) {
                 _searchListUiState.update { searchList ->
                     searchList.copy(
-                        items = converter.savedEntityToSavedItemUiState(_cachedSavedLocations)
+                        items = _cachedSavedLocations
                     )
                 }
             }
 
             launch(Dispatchers.IO) {
-                supportedRepository.getAllLocationSupported()
-                    .collect { supportedEntities ->
-                        _cachedSupportedLocations.addAll(supportedEntities)
+                supportedRepository.getAllLocationSupportedN()
+                    .collect { searchItemUiStates ->
+                        _cachedSupportedLocations.addAll(searchItemUiStates)
                     }
             }
         }
     }
 
-     fun log() {
-        _cachedSavedLocations.forEach {
-            println("Rez saved ${it}")
-        }
-    }
+    /*fun log() {
+       _cachedSavedLocations.forEach {
+           println("Rez saved ${it}")
+       }
+   }*/
 
     fun getSearch(query: String) {
-        val result = if(query.isNotBlank()) {
-            converter.supportedEntityToSearchItemUiState(
-                _cachedSupportedLocations.filter { supportedEntity ->
-                    supportedEntity.name.startsWith(query, true)
-                }
-            )
+        val result: Set<SearchListItem> = if (query.isNotBlank()) {
+            _cachedSupportedLocations.filter { supportedEntity ->
+                supportedEntity.name.startsWith(query, true)
+            }.toSet()
         } else {
-            converter.savedEntityToSavedItemUiState(_cachedSavedLocations)
+            _cachedSavedLocations
         }
 
         setSearchBarLoadingState(false)

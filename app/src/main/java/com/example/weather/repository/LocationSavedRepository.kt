@@ -1,81 +1,52 @@
 package com.example.weather.repository
 
+import android.util.Log
 import com.example.weather.database.LocationSavedDao
 import com.example.weather.models.data.location.LocationSavedEntity
+import com.example.weather.models.mappers.toUiModel
+import com.example.weather.models.ui.search.SavedItemUiState
+import com.example.weather.models.ui.weather.CurrentWeatherUiState
+import com.example.weather.util.data.cleanString
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 class LocationSavedRepository @Inject constructor(
     private val locationSavedDao: LocationSavedDao
 ) {
-    val _mockLocationSaved: List<LocationSavedEntity> = listOf(
-        LocationSavedEntity(
-            name = "Orlando",
-            descriptionTemp = "Sunny",
-            currentTemp = "75",
-            minTemp = "65",
-            maxTemp = "102"
-        ),
-        LocationSavedEntity(
-            name = "Altamonte Springs",
-            descriptionTemp = "Rainy",
-            currentTemp = "85",
-            minTemp = "65",
-            maxTemp = "102"
-        ),
-        LocationSavedEntity(
-            name = "Wekiva Springs",
-            descriptionTemp = "Mostly Sunny",
-            currentTemp = "95",
-            minTemp = "65",
-            maxTemp = "102"
-        ),
-        LocationSavedEntity(
-            name = "Apopka",
-            descriptionTemp = "Cloudy ",
-            currentTemp = "105",
-            minTemp = "65",
-            maxTemp = "102"
-        ),
-        LocationSavedEntity(
-            name = "Maitland",
-            descriptionTemp = "Sunny",
-            currentTemp = "90",
-            minTemp = "65",
-            maxTemp = "102"
-        ),
-        LocationSavedEntity(
-            name = "Winter Park",
-            descriptionTemp = "Rainy",
-            currentTemp = "70",
-            minTemp = "65",
-            maxTemp = "102"
-        ),
-        LocationSavedEntity(
-            name = "Miami",
-            descriptionTemp = "Sunny",
-            currentTemp = "60",
-            minTemp = "65",
-            maxTemp = "102"
-        ),
-        LocationSavedEntity(
-            name = "Clermont",
-            descriptionTemp = "Cloudy",
-            currentTemp = "75",
-            minTemp = "65",
-            maxTemp = "102"
-        ),
-        LocationSavedEntity(
-            name = "Ocoee",
-            descriptionTemp = "Most Sunny",
-            currentTemp = "95",
-            minTemp = "65",
-            maxTemp = "102"
-        ),
-    )
+    fun getAllLocations(): Flow<List<SavedItemUiState>> = flow {
+        try {
+            locationSavedDao.getAll()
+                .flowOn(Dispatchers.IO)
+                .conflate()
+                .collect { entities ->
+                    val savedItemUiStates: List<SavedItemUiState> = entities.map { entity ->
+                        entity.toUiModel()
+                    }
 
-    fun getAllLocations(): Flow<List<LocationSavedEntity>> = locationSavedDao.getAll()
-    suspend fun insertLocation(entity: LocationSavedEntity) = locationSavedDao.insert(entity)
+                    emit(savedItemUiStates)
+                }
+        } catch (e: Exception) {
+            Log.e("LocationSavedRepository", "Fetching saved locations error: ${e.message}", e)
+            emit(emptyList())
+        }
+    }
+
+    suspend fun insertLocation(uiModel: CurrentWeatherUiState) {
+        val entity = LocationSavedEntity(
+            name = uiModel.city ,
+            descriptionTemp = uiModel.tempDescription,
+            currentTemp = cleanString(uiModel.currentTemp),
+            maxTemp = cleanString(uiModel.highAndLowTemp.second),
+            minTemp = cleanString(uiModel.highAndLowTemp.first)
+        )
+
+        locationSavedDao.insert(entity)
+    }
+
     suspend fun updateLocation(entity: LocationSavedEntity) = locationSavedDao.update(entity)
     suspend fun deleteLocation(entity: LocationSavedEntity) = locationSavedDao.delete(entity)
 }

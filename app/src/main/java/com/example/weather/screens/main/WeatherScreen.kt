@@ -466,7 +466,7 @@ private fun DailyForecastItem(
         CurrentWeatherImage(forecastUrlImage = forecastUrlImage)
 
         Text(
-            text = "Low ${highAndLow.second} |  High ${highAndLow.first}",
+            text = "Low ${highAndLow.second} | High ${highAndLow.first}",
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium
         )

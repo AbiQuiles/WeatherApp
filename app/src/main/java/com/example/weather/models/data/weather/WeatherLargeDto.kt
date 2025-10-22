@@ -1,6 +1,6 @@
 package com.example.weather.models.data.weather
 
-data class WeatherLarge(
+data class WeatherLargeDto(
     val clouds: Int,
     val deg: Int,
     val dt: Int,
