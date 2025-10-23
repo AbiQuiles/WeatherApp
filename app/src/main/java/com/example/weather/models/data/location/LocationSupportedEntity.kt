@@ -10,5 +10,7 @@ data class LocationSupportedEntity(
     @PrimaryKey
     val id: UUID = UUID.randomUUID(),
     @ColumnInfo(name = "location_name")
-    val name: String
+    val name: String,
+    @ColumnInfo(name = "location_save", defaultValue = "0")
+    val saveTag: Boolean = false
 )

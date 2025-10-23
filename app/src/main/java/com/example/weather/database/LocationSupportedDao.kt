@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.weather.models.data.location.LocationSupportedEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -21,6 +22,9 @@ interface LocationSupportedDao {
 
     @Query(value = "SELECT * from location_supported_tbl where location_name = :name")
     suspend fun getByName(name: String): LocationSupportedEntity
+
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun update(entity: LocationSupportedEntity)
 
     @Query("SELECT COUNT(*) FROM location_supported_tbl")
     suspend fun count(): Int

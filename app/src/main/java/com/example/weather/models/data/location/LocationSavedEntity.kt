@@ -9,6 +9,8 @@ import java.util.UUID
 data class LocationSavedEntity(
     @PrimaryKey
     val id: UUID = UUID.randomUUID(),
+    @ColumnInfo(name = "location_primary", defaultValue = "0")
+    val isPrimary: Boolean = false,
     @ColumnInfo(name = "location_name")
     val name: String,
     @ColumnInfo(name = "description_temp")
@@ -20,5 +22,3 @@ data class LocationSavedEntity(
     @ColumnInfo(name = "min_temp")
     val minTemp: String
 )
-
-//TODO: Think through this entity still. What properties are we going to be saving?

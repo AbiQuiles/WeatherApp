@@ -48,8 +48,6 @@ object DatabaseModule {
             context = appContext,
             klass = WeatherDataBase::class.java,
             name = "weather_db"
-        )
-            .fallbackToDestructiveMigration(false)
-            .build()
+        ).build()
 
 }
