@@ -2,6 +2,7 @@ package com.example.weather.di.repositories
 
 import com.example.weather.database.LocationSavedDao
 import com.example.weather.database.LocationSupportedDao
+import com.example.weather.repository.LocationRepository
 import com.example.weather.repository.LocationSavedRepository
 import com.example.weather.repository.LocationSupportedRepository
 import dagger.Module
@@ -27,6 +28,17 @@ object RepositoryModule {
     fun provideLocationSupportedRepository(locationSupportedDao: LocationSupportedDao): LocationSupportedRepository =
         LocationSupportedRepository(
             locationSupportedDao = locationSupportedDao
+        )
+
+    @Provides
+    @Singleton
+    fun provideLocationRepository(
+        locationSupportedRepository: LocationSupportedRepository,
+        locationSavedRepository: LocationSavedRepository
+    ): LocationRepository =
+        LocationRepository(
+            locationSupportedRepository = locationSupportedRepository,
+            locationSavedRepository = locationSavedRepository
         )
 
 }

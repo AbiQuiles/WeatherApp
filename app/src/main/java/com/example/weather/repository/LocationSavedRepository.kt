@@ -10,6 +10,7 @@ import com.example.weather.util.data.cleanString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
@@ -22,6 +23,7 @@ class LocationSavedRepository @Inject constructor(
             locationSavedDao.getAll()
                 .flowOn(Dispatchers.IO)
                 .conflate()
+                .distinctUntilChanged()
                 .collect { entities ->
                     val savedItemUiStates: List<SavedItemUiState> = entities.map { entity ->
                         entity.toUiModel()
@@ -35,16 +37,22 @@ class LocationSavedRepository @Inject constructor(
         }
     }
 
-    suspend fun insertLocation(uiModel: CurrentWeatherUiState) {
-        val entity = LocationSavedEntity(
-            name = uiModel.city ,
-            descriptionTemp = uiModel.tempDescription,
-            currentTemp = cleanString(uiModel.currentTemp),
-            maxTemp = cleanString(uiModel.highAndLowTemp.second),
-            minTemp = cleanString(uiModel.highAndLowTemp.first)
-        )
+    suspend fun insertLocation(uiModel: CurrentWeatherUiState): Boolean {
+        return try {
+            val entity = LocationSavedEntity(
+                name = uiModel.city ,
+                descriptionTemp = uiModel.tempDescription,
+                currentTemp = cleanString(uiModel.currentTemp),
+                maxTemp = cleanString(uiModel.highAndLowTemp.second),
+                minTemp = cleanString(uiModel.highAndLowTemp.first)
+            )
 
-        locationSavedDao.insert(entity)
+            locationSavedDao.insert(entity)
+            true
+        } catch (e: Exception) {
+            Log.e("LocationSavedRepository", "Save locations attempt error: ${e.message}", e)
+            false
+        }
     }
 
     suspend fun updateLocation(entity: LocationSavedEntity) = locationSavedDao.update(entity)

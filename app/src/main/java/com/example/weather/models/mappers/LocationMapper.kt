@@ -14,7 +14,8 @@ fun LocationSavedEntity.toUiModel(): SavedItemUiState = SavedItemUiState(
 )
 
 fun LocationSupportedEntity.toUiModel(): SearchItemUiState = SearchItemUiState(
-    name = this.name
+    name = this.name,
+    saveTag = this.saveTag
 )
 
 fun LocationSupportedDto.toEntity(): LocationSupportedEntity = LocationSupportedEntity(

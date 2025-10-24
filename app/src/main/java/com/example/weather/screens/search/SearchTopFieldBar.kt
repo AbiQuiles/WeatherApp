@@ -62,7 +62,8 @@ fun SearchTopFieldBar(
         navigationIcon = {
             IconButton(
                 onClick = events.onExitRoute,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier
+                    .size(34.dp)
                 ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBackIosNew,

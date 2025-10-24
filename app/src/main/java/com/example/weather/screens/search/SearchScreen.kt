@@ -1,15 +1,19 @@
 package com.example.weather.screens.search
 
+ import androidx.compose.foundation.background
  import androidx.compose.foundation.clickable
  import androidx.compose.foundation.layout.Arrangement
+ import androidx.compose.foundation.layout.Box
  import androidx.compose.foundation.layout.Column
  import androidx.compose.foundation.layout.Row
  import androidx.compose.foundation.layout.WindowInsets
  import androidx.compose.foundation.layout.fillMaxSize
  import androidx.compose.foundation.layout.fillMaxWidth
+ import androidx.compose.foundation.layout.height
  import androidx.compose.foundation.layout.padding
  import androidx.compose.foundation.layout.size
  import androidx.compose.foundation.layout.systemBars
+ import androidx.compose.foundation.layout.width
  import androidx.compose.foundation.layout.windowInsetsPadding
  import androidx.compose.foundation.lazy.LazyColumn
  import androidx.compose.foundation.lazy.items
@@ -28,9 +32,6 @@ package com.example.weather.screens.search
  import androidx.compose.runtime.Composable
  import androidx.compose.runtime.collectAsState
  import androidx.compose.runtime.getValue
- import androidx.compose.runtime.mutableStateOf
- import androidx.compose.runtime.remember
- import androidx.compose.runtime.setValue
  import androidx.compose.ui.Alignment
  import androidx.compose.ui.Modifier
  import androidx.compose.ui.graphics.vector.ImageVector
@@ -52,8 +53,7 @@ package com.example.weather.screens.search
 fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel = hiltViewModel()) {
     val searchBarUiState by viewModel.searchBarUiState.collectAsState()
     val searchResultListUiState by viewModel.searchListUiState.collectAsState()
-    var showBottomSheetState by remember { mutableStateOf(false) }
-    var locationSelectedState by remember { mutableStateOf("") }
+    val modalSheetUiState by viewModel.modalSheetUiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -61,7 +61,7 @@ fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel
                 uiState = searchBarUiState,
                 events = SearchBarEvents(
                     searchTextChange = { viewModel.setSearchBarText(it) },
-                    onSearch = { viewModel.getSearch(it) },
+                    onSearch = { viewModel.onSearch(it) },
                     isLoading = { viewModel.setSearchBarLoadingState(it) },
                     onExitRoute = { navController.popBackStack() }
                 ),
@@ -73,9 +73,11 @@ fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel
             modifier = Modifier.padding(innerPadding),
             searchListUiState = searchResultListUiState,
             searchText = searchBarUiState.searchText,
-            onShowBottomSheet = { showBottomSheetState = it },
-            onLocationSelected = { locationSelected ->
-                locationSelectedState = locationSelected
+            onLocationSelected = { locationSelected, isLocationSaved ->
+                viewModel.onLocationSelected(
+                    location = locationSelected,
+                    isSaved = isLocationSaved
+                )
 
                 /*navController.previousBackStackEntry
                     ?.savedStateHandle
@@ -84,23 +86,39 @@ fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel
                 navController.popBackStack()*/
             },
         ) {
-            if (showBottomSheetState) {
+            if (modalSheetUiState.showSheet) {
                 val sheetState = rememberModalBottomSheetState(
                     skipPartiallyExpanded = true
                 )
 
                 ModalBottomSheet(
-                    onDismissRequest = { showBottomSheetState = false  },
+                    onDismissRequest = { viewModel.onDismissBottomSheet() },
                     sheetState = sheetState,
                     shape = MaterialTheme.shapes.small,
+                    dragHandle = {
+                        Box(
+                            modifier = Modifier
+                                .padding(vertical = 12.dp)
+                                .width(32.dp)
+                                .height(4.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                                    shape = MaterialTheme.shapes.extraLarge
+                                )
+                        )
+                    },
                     modifier = Modifier
                         .padding(top = 20.dp)
                         .windowInsetsPadding(WindowInsets.systemBars)
                 ) {
-                    if (locationSelectedState.isNotBlank()) {
+                    if (modalSheetUiState.locationSelected.isNotBlank()) {
                         WeatherModalScreen(
-                            locationName = locationSelectedState
-                        )
+                            locationName = modalSheetUiState.locationSelected,
+                            locationSaved = modalSheetUiState.isLocationSaved,
+                        ) { onSave ->
+                            viewModel.onLocationSaveStatusChanged(onSave)
+                            //viewModel.showSavedLocation()
+                        }
                     } else {
                         Text("There was an issue loading this location.")
                     }
@@ -115,8 +133,7 @@ private fun MainLayout(
     modifier: Modifier = Modifier,
     searchListUiState: SearchListUiState,
     searchText: String,
-    onLocationSelected: (String) -> Unit,
-    onShowBottomSheet: (Boolean) -> Unit,
+    onLocationSelected: (String, Boolean) -> Unit,
     modalBottomSheet: @Composable () -> Unit
 ) {
     val searchItems: List<SearchListItem> = searchListUiState.items.toList()
@@ -143,9 +160,8 @@ private fun MainLayout(
                     if (searchText.isEmpty() && item is SavedItemUiState) {
                         SavedItem(savedItem = item)
                     } else if (searchText.isNotEmpty() && item is SearchItemUiState) {
-                        SearchedItem(searchItem = item) { locationClicked ->
-                            onLocationSelected(locationClicked)
-                            onShowBottomSheet(true)
+                        SearchedItem(searchItem = item) { locationClicked, isLocationSaved ->
+                            onLocationSelected(locationClicked, isLocationSaved)
                         }
                     }
                 }
@@ -241,7 +257,7 @@ private fun SavedItem(savedItem: SavedItemUiState) {
 }
 
 @Composable
-private fun SearchedItem(searchItem: SearchItemUiState, onLocationClick: (String) -> Unit) {
+private fun SearchedItem(searchItem: SearchItemUiState, onLocationClick: (String, Boolean) -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(18.dp),
@@ -249,7 +265,10 @@ private fun SearchedItem(searchItem: SearchItemUiState, onLocationClick: (String
             .fillMaxWidth()
             .padding(12.dp)
             .clickable(onClick = {
-                onLocationClick(searchItem.name)
+                onLocationClick(
+                    searchItem.name,
+                    searchItem.saveTag
+                )
             })
     ) {
         Icon(
@@ -274,8 +293,7 @@ private fun MainLayoutWithSavedItemsPreview() {
     MainLayout(
         searchListUiState = mockSearchListUiState,
         searchText = "",
-        onLocationSelected = {},
-        onShowBottomSheet = { false },
+        onLocationSelected = { _, _ -> },
         modalBottomSheet = { }
     )
 }
@@ -290,8 +308,7 @@ private fun MainLayoutWithSearchItemsPreview() {
     MainLayout(
         searchListUiState = mockSearchListUiState,
         searchText = "Not Empty",
-        onLocationSelected = {},
-        onShowBottomSheet = { false },
+        onLocationSelected = { _, _ -> },
         modalBottomSheet = { }
     )
 }
@@ -302,8 +319,7 @@ private fun MainLayoutWithNoSaveViewPreview() {
     MainLayout(
         searchListUiState = SearchListUiState(),
         searchText = "",
-        onLocationSelected = {},
-        onShowBottomSheet = { false },
+        onLocationSelected = { _, _ -> },
         modalBottomSheet = { }
     )
 }
@@ -314,8 +330,7 @@ private fun MainLayoutWithNoResultViewPreview() {
     MainLayout(
         searchListUiState = SearchListUiState(),
         searchText = "Location",
-        onLocationSelected = {},
-        onShowBottomSheet = { false },
+        onLocationSelected = { _, _ -> },
         modalBottomSheet = { }
     )
 }
@@ -323,7 +338,7 @@ private fun MainLayoutWithNoResultViewPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun SearchedItemPreview() {
-    SearchedItem(SearchItemUiState()) {
+    SearchedItem(SearchItemUiState()) { _, _ ->
 
     }
 }

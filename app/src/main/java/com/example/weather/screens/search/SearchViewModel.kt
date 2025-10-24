@@ -2,6 +2,7 @@ package com.example.weather.screens.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.weather.models.ui.search.ModalSheetUiState
 import com.example.weather.models.ui.search.SavedItemUiState
 import com.example.weather.models.ui.search.SearchItemUiState
 import com.example.weather.models.ui.search.SearchListItem
@@ -33,6 +34,9 @@ class SearchViewModel @Inject constructor(
     private val _searchListUiState: MutableStateFlow<SearchListUiState> = MutableStateFlow(SearchListUiState())
     val searchListUiState: StateFlow<SearchListUiState> = _searchListUiState.asStateFlow()
 
+    private val _modalSheetUiState: MutableStateFlow<ModalSheetUiState> = MutableStateFlow(ModalSheetUiState())
+    val modalSheetUiState: StateFlow<ModalSheetUiState> = _modalSheetUiState.asStateFlow()
+
     init {
         viewModelScope.launch {
 
@@ -46,14 +50,12 @@ class SearchViewModel @Inject constructor(
 
             launch(Dispatchers.Main) {
                 _searchListUiState.update { searchList ->
-                    searchList.copy(
-                        items = _cachedSavedLocations
-                    )
+                    searchList.copy(items = _cachedSavedLocations)
                 }
             }
 
             launch(Dispatchers.IO) {
-                supportedRepository.getAllLocationSupportedN()
+                supportedRepository.getAllLocationSupported()
                     .collect { searchItemUiStates ->
                         _cachedSupportedLocations.addAll(searchItemUiStates)
                     }
@@ -67,7 +69,7 @@ class SearchViewModel @Inject constructor(
        }
    }*/
 
-    fun getSearch(query: String) {
+    fun onSearch(query: String) {
         val result: Set<SearchListItem> = if (query.isNotBlank()) {
             _cachedSupportedLocations.filter { supportedEntity ->
                 supportedEntity.name.startsWith(query, true)
@@ -83,6 +85,27 @@ class SearchViewModel @Inject constructor(
         }
     }
 
+    fun onLocationSelected(location: String, isSaved: Boolean) {
+        _modalSheetUiState.update { uiState ->
+            uiState.copy(
+                locationSelected = location,
+                isLocationSaved = isSaved,
+                showSheet = true
+            )
+        }
+        // Might want to refresh the search list here to reflect the change
+        //showSavedLocation()
+    }
+
+    fun onDismissBottomSheet() = _modalSheetUiState.update { uiState ->
+        uiState.copy(showSheet = false)
+    }
+
+    fun onLocationSaveStatusChanged(onSave: Boolean) = _modalSheetUiState.update { uiState ->
+        uiState.copy(isLocationSaved = onSave)
+    }
+
+
     fun setSearchBarText(text: String) = _searchBarUiState.update { uiState ->
         uiState.copy(
             searchText = text
@@ -91,5 +114,15 @@ class SearchViewModel @Inject constructor(
 
     fun setSearchBarLoadingState(newState: Boolean) = _searchBarUiState.update { uiState ->
         uiState.copy(isLoading = newState)
+    }
+
+    fun showSavedLocation() {
+        viewModelScope.launch {
+            setSearchBarText(text = "")
+
+            _searchListUiState.update { searchList ->
+                searchList.copy(items = _cachedSavedLocations)
+            }
+        }
     }
 }

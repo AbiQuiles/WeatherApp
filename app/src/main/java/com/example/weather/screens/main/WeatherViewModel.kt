@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weather.models.ui.weather.CurrentWeatherUiState
 import com.example.weather.models.ui.weather.DailyForecastItemUiState
-import com.example.weather.repository.LocationSavedRepository
+import com.example.weather.repository.LocationRepository
 import com.example.weather.repository.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
     private val weatherRepository: WeatherRepository,
-    private val savedRepository: LocationSavedRepository
+    private val locationRepository: LocationRepository
 ) : ViewModel() {
     private val _currentWeatherUiState: MutableStateFlow<CurrentWeatherUiState?> = MutableStateFlow(null)
     val currentWeatherUiState: StateFlow<CurrentWeatherUiState?> = _currentWeatherUiState.asStateFlow()
@@ -41,8 +41,8 @@ class WeatherViewModel @Inject constructor(
             val currentWeatherState = _currentWeatherUiState.value
 
             if (currentWeatherState != null && onSave) {
-                savedRepository.insertLocation(
-                    uiModel = currentWeatherState
+                locationRepository.saveLocation(
+                    weatherUiState = currentWeatherState
                 )
             }
         }
