@@ -117,7 +117,6 @@ fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel
                             locationSaved = modalSheetUiState.isLocationSaved,
                         ) { onSave ->
                             viewModel.onLocationSaveStatusChanged(onSave)
-                            //viewModel.showSavedLocation()
                         }
                     } else {
                         Text("There was an issue loading this location.")

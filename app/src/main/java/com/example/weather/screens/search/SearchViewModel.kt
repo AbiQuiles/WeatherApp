@@ -57,17 +57,12 @@ class SearchViewModel @Inject constructor(
             launch(Dispatchers.IO) {
                 supportedRepository.getAllLocationSupported()
                     .collect { searchItemUiStates ->
+                        _cachedSupportedLocations.clear()
                         _cachedSupportedLocations.addAll(searchItemUiStates)
                     }
             }
         }
     }
-
-    /*fun log() {
-       _cachedSavedLocations.forEach {
-           println("Rez saved ${it}")
-       }
-   }*/
 
     fun onSearch(query: String) {
         val result: Set<SearchListItem> = if (query.isNotBlank()) {
@@ -93,16 +88,18 @@ class SearchViewModel @Inject constructor(
                 showSheet = true
             )
         }
-        // Might want to refresh the search list here to reflect the change
-        //showSavedLocation()
     }
 
     fun onDismissBottomSheet() = _modalSheetUiState.update { uiState ->
         uiState.copy(showSheet = false)
     }
 
-    fun onLocationSaveStatusChanged(onSave: Boolean) = _modalSheetUiState.update { uiState ->
-        uiState.copy(isLocationSaved = onSave)
+    fun onLocationSaveStatusChanged(onSave: Boolean) {
+        _modalSheetUiState.update { uiState ->
+            uiState.copy(isLocationSaved = onSave)
+        }
+
+        clearSearch()
     }
 
 
@@ -116,13 +113,8 @@ class SearchViewModel @Inject constructor(
         uiState.copy(isLoading = newState)
     }
 
-    fun showSavedLocation() {
-        viewModelScope.launch {
-            setSearchBarText(text = "")
-
-            _searchListUiState.update { searchList ->
-                searchList.copy(items = _cachedSavedLocations)
-            }
-        }
+    private fun clearSearch() {
+        setSearchBarText(text = "")
+        onSearch(query = "")
     }
 }
