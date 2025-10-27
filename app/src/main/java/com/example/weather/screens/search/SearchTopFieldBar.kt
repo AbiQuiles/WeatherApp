@@ -20,11 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
@@ -33,9 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.weather.models.ui.search.searchbar.SearchBarEvents
 import com.example.weather.models.ui.search.searchbar.SearchBarUiState
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,25 +73,16 @@ private fun SearchField(
     events: SearchBarEvents,
 ) {
     //TODO: Use FocusRequester to to display keyboard immediately
-    //Debouncer
-    val coroutineScope = rememberCoroutineScope()
-    var debounceJob by remember { mutableStateOf<Job?>(null) }
 
     OutlinedTextField(
         value = uiState.searchText,
         onValueChange = { newText ->
             events.searchTextChange(newText)
 
-            debounceJob?.cancel()
             if (newText.isNotBlank()) {
-                events.isLoading(true)
-                debounceJob = coroutineScope.launch {
-                    delay(1000L)
-                    events.onSearch(newText)
-                }
+                events.onSearch(newText)
             } else {
                 events.onSearch("")
-                events.isLoading(false)
             }
         },
         textStyle =  TextStyle(
@@ -121,7 +104,6 @@ private fun SearchField(
                     onClick = {
                         events.searchTextChange("")
                         events.onSearch("")
-                        events.isLoading(false)
                     }
                 ) {
                     Icon(
