@@ -9,12 +9,15 @@ class LocationRepository @Inject constructor(
     private val locationSupportedRepository: LocationSupportedRepository,
     private val locationSavedRepository: LocationSavedRepository
 ) {
-    suspend fun saveLocation(weatherUiState: CurrentWeatherUiState) =
+    suspend fun saveLocation(weatherUiState: CurrentWeatherUiState): Boolean =
         withContext(Dispatchers.IO) {
             val saveSuccess = locationSavedRepository.insertLocation(weatherUiState)
 
             if (saveSuccess) {
                 locationSupportedRepository.updateSaveTag(location = weatherUiState.city)
+                true
+            } else {
+                false
             }
         }
 }

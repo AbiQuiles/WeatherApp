@@ -9,6 +9,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -21,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.weather.models.ui.weather.CurrentWeatherUiState
 import com.example.weather.models.ui.weather.DailyForecastItemUiState
-import com.example.weather.widgets.WeatherModalTopBar
+import com.example.weather.widgets.rememberSnackbarManager
 
 @Composable
 fun WeatherModalScreen(
@@ -30,14 +31,12 @@ fun WeatherModalScreen(
     locationSaved: Boolean,
     isLocationSaved: (Boolean) -> Unit
 ) {
-    val currentWeatherUiState by viewModel.currentWeatherUiState.collectAsState()
-    val dailyForecastItemUiState by viewModel.dailyForecastItemUiState.collectAsState()
+    val currentWeatherUiState: CurrentWeatherUiState? by viewModel.currentWeatherUiState.collectAsState()
+    val dailyForecastItemUiState: List<DailyForecastItemUiState?> by viewModel.dailyForecastItemUiState.collectAsState()
     val loadingState by remember(currentWeatherUiState) {
-        if (currentWeatherUiState == null)
-            mutableStateOf(true)
-        else
-            mutableStateOf(false)
+        mutableStateOf(currentWeatherUiState == null)
     }
+    val snackbarManager = rememberSnackbarManager()
 
     LaunchedEffect(locationName) {
         viewModel.getSelectedWeather(locationName)
@@ -46,9 +45,18 @@ fun WeatherModalScreen(
     Scaffold(
         topBar = {
             TopBar(locationSaved = locationSaved) { onSave ->
-                viewModel.saveLocationByName(onSave = onSave)
-                isLocationSaved(onSave)
+                viewModel.saveLocationByName { saveSuccess ->
+                    if (saveSuccess) {
+                        isLocationSaved(onSave)
+                        snackbarManager.showSnackbar("Location save successful")
+                    } else {
+                        snackbarManager.showSnackbar("Failed to save location")
+                    }
+                }
             }
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarManager.snackbarHostState)
         }
     ) { innerPadding ->
         WeatherBodyLayout(

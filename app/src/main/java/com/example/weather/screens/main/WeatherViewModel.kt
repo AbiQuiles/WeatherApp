@@ -36,15 +36,20 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
-    fun saveLocationByName(onSave: Boolean) {
-        viewModelScope.launch {
-            val currentWeatherState = _currentWeatherUiState.value
+    fun saveLocationByName(onSaveSuccess: (Boolean) -> Unit) {
+        val currentWeatherState: CurrentWeatherUiState? = _currentWeatherUiState.value
 
-            if (currentWeatherState != null && onSave) {
-                locationRepository.saveLocation(
-                    weatherUiState = currentWeatherState
-                )
-            }
+        if (currentWeatherState == null) {
+            onSaveSuccess(false)
+            return
+        }
+
+        viewModelScope.launch {
+            val saveSuccess = locationRepository.saveLocation(
+                weatherUiState = currentWeatherState
+            )
+
+            onSaveSuccess(saveSuccess)
         }
     }
 }

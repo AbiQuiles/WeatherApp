@@ -44,7 +44,6 @@ import com.example.weather.navigation.AppNavKeys
 import com.example.weather.navigation.AppRoutes
 import com.example.weather.widgets.FloatingModal
 import com.example.weather.widgets.SwitcherRow
-import com.example.weather.widgets.WeatherScreenTopBar
 
 @Composable
 fun WeatherScreen(
