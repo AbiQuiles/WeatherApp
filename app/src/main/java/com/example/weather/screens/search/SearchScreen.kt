@@ -21,7 +21,9 @@ package com.example.weather.screens.search
  import androidx.compose.material.icons.filled.LocationOff
  import androidx.compose.material.icons.filled.LocationOn
  import androidx.compose.material.icons.rounded.Search
- import androidx.compose.material3.Card
+ import androidx.compose.material.icons.twotone.Delete
+ import androidx.compose.material.icons.twotone.Flag
+ import androidx.compose.material.icons.twotone.Refresh
  import androidx.compose.material3.ExperimentalMaterial3Api
  import androidx.compose.material3.Icon
  import androidx.compose.material3.MaterialTheme
@@ -34,6 +36,7 @@ package com.example.weather.screens.search
  import androidx.compose.runtime.getValue
  import androidx.compose.ui.Alignment
  import androidx.compose.ui.Modifier
+ import androidx.compose.ui.graphics.Color
  import androidx.compose.ui.graphics.vector.ImageVector
  import androidx.compose.ui.text.font.FontWeight
  import androidx.compose.ui.tooling.preview.Preview
@@ -47,6 +50,8 @@ package com.example.weather.screens.search
  import com.example.weather.models.ui.search.SearchListUiState
  import com.example.weather.models.ui.search.searchbar.SearchBarEvents
  import com.example.weather.screens.main.WeatherModalScreen
+ import com.example.weather.widgets.SwipeRevealCard
+ import com.example.weather.widgets.SwipeRevealCardButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -166,13 +171,13 @@ private fun MainLayout(
                 }
             }
         } else if (searchText.isNotEmpty() && searchItems.isEmpty()) {
-            MessageView(
+            NoLocationFoundView(
                 mainMsg = "No location found",
                 subMsg = "Try searching for another location",
                 image = Icons.Default.LocationOff
             )
         } else {
-            MessageView(
+            NoLocationFoundView(
                 mainMsg = "No location saved",
                 subMsg = "Try searching for a location",
                 image = Icons.Default.LocationOn
@@ -182,7 +187,7 @@ private fun MainLayout(
 }
 
 @Composable
-private fun MessageView(
+private fun NoLocationFoundView(
     mainMsg: String,
     subMsg: String,
     image: ImageVector
@@ -211,48 +216,72 @@ private fun MessageView(
 
 @Composable
 private fun SavedItem(savedItem: SavedItemUiState) {
-    Card(
-        shape = MaterialTheme.shapes.small,
-        modifier = Modifier.padding(6.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(8.dp)
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    text = savedItem.name,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = "${savedItem.currentTemp}°",
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Medium
-                )
+    SwipeRevealCard(
+        frontContent = {
+            Column(modifier = Modifier.padding(8.dp)) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = savedItem.name,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = "${savedItem.currentTemp}°",
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp, horizontal = 6.dp)
+                ) {
+                    Text(
+                        text = savedItem.descriptionTemp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = "L: ${savedItem.lowAndHighTemp.first}° | H: ${savedItem.lowAndHighTemp.second}°",
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp, horizontal = 6.dp)
+        },
+        hiddenContent = { hideContainer ->
+            SwipeRevealCardButton(
+                iconImage = Icons.TwoTone.Flag,
+                iconDescription = "Flag Location",
+                backgroundColor = Color(0xF7FFB300)
             ) {
-                Text(
-                    text = savedItem.descriptionTemp,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = "L: ${savedItem.lowAndHighTemp.first}° |  H: ${savedItem.lowAndHighTemp.second}°",
-                    fontWeight = FontWeight.Medium
-                )
+                println("Rez Click 1")
+                hideContainer()
+            }
+
+            SwipeRevealCardButton(
+                iconImage = Icons.TwoTone.Refresh,
+                iconDescription = "Flag Location",
+                backgroundColor = Color(0xD86B3A86)
+            ) {
+                println("Rez Click 2")
+                hideContainer()
+            }
+
+            SwipeRevealCardButton(
+                iconImage = Icons.TwoTone.Delete,
+                iconDescription = "Flag Location",
+                backgroundColor = MaterialTheme.colorScheme.error
+            ) {
+                println("Rez Click 3")
+                hideContainer()
             }
         }
-    }
+    )
 }
 
 @Composable

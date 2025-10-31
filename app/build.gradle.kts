@@ -53,6 +53,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     //Jetpack Compose Navigation
     implementation(libs.navigation.compose)
+    //Jetpack Compose Wear
+    implementation(libs.androidx.compose.wear.material)
 
     //Coil | Doc -> https://coil-kt.github.io/coil/
     implementation(libs.coil.compose) //Our version -> https://coil-kt.github.io/coil/upgrading_to_coil3/
