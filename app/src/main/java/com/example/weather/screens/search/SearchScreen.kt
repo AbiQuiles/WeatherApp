@@ -52,6 +52,8 @@ package com.example.weather.screens.search
  import com.example.weather.screens.main.WeatherModalScreen
  import com.example.weather.widgets.SwipeRevealCard
  import com.example.weather.widgets.SwipeRevealCardButton
+ import com.example.weather.widgets.SwipeRevealCardManager
+ import com.example.weather.widgets.rememberSwipeRevealCardManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -153,6 +155,8 @@ private fun MainLayout(
         modalBottomSheet()
 
         if (searchItems.isNotEmpty()) {
+            val manager: SwipeRevealCardManager = rememberSwipeRevealCardManager()
+
             LazyColumn (
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
@@ -160,9 +164,10 @@ private fun MainLayout(
                     .fillMaxSize()
                     .padding(6.dp)
             ) {
+
                 items(searchItems) { item ->
                     if (searchText.isEmpty() && item is SavedItemUiState) {
-                        SavedItem(savedItem = item)
+                        SavedItem(savedItem = item, manager)
                     } else if (searchText.isNotEmpty() && item is SearchItemUiState) {
                         SearchedItem(searchItem = item) { locationClicked, isLocationSaved ->
                             onLocationSelected(locationClicked, isLocationSaved)
@@ -215,8 +220,13 @@ private fun NoLocationFoundView(
 }
 
 @Composable
-private fun SavedItem(savedItem: SavedItemUiState) {
+private fun SavedItem(
+    savedItem: SavedItemUiState,
+    manager: SwipeRevealCardManager
+    ) {
+
     SwipeRevealCard(
+        manager = manager,
         frontContent = {
             Column(modifier = Modifier.padding(8.dp)) {
                 Row(
@@ -374,7 +384,9 @@ private fun SearchedItemPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun SavedItemPreview() {
+    val manager: SwipeRevealCardManager = rememberSwipeRevealCardManager()
     SavedItem(
-        savedItem = SavedItemUiState()
+        savedItem = SavedItemUiState(),
+        manager = manager
     )
 }
