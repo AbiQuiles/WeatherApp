@@ -22,8 +22,8 @@ package com.example.weather.screens.search
  import androidx.compose.material.icons.filled.LocationOn
  import androidx.compose.material.icons.rounded.Search
  import androidx.compose.material.icons.twotone.Delete
- import androidx.compose.material.icons.twotone.Flag
  import androidx.compose.material.icons.twotone.Refresh
+ import androidx.compose.material3.CardDefaults
  import androidx.compose.material3.ExperimentalMaterial3Api
  import androidx.compose.material3.Icon
  import androidx.compose.material3.MaterialTheme
@@ -50,10 +50,8 @@ package com.example.weather.screens.search
  import com.example.weather.models.ui.search.SearchListUiState
  import com.example.weather.models.ui.search.searchbar.SearchBarEvents
  import com.example.weather.screens.main.WeatherModalScreen
- import com.example.weather.widgets.SwipeRevealCard
- import com.example.weather.widgets.SwipeRevealCardButton
- import com.example.weather.widgets.SwipeRevealCardManager
- import com.example.weather.widgets.rememberSwipeRevealCardManager
+ import com.example.weather.widgets.SwipeToDismissCard
+ import com.example.weather.widgets.SwipeToDismissCardIcon
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -155,8 +153,6 @@ private fun MainLayout(
         modalBottomSheet()
 
         if (searchItems.isNotEmpty()) {
-            val manager: SwipeRevealCardManager = rememberSwipeRevealCardManager()
-
             LazyColumn (
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
@@ -167,7 +163,7 @@ private fun MainLayout(
 
                 items(searchItems) { item ->
                     if (searchText.isEmpty() && item is SavedItemUiState) {
-                        SavedItem(savedItem = item, manager)
+                        SavedItem(savedItem = item)
                     } else if (searchText.isNotEmpty() && item is SearchItemUiState) {
                         SearchedItem(searchItem = item) { locationClicked, isLocationSaved ->
                             onLocationSelected(locationClicked, isLocationSaved)
@@ -220,15 +216,14 @@ private fun NoLocationFoundView(
 }
 
 @Composable
-private fun SavedItem(
-    savedItem: SavedItemUiState,
-    manager: SwipeRevealCardManager
-    ) {
-
-    SwipeRevealCard(
-        manager = manager,
+private fun SavedItem(savedItem: SavedItemUiState) {
+    SwipeToDismissCard(
         frontContent = {
-            Column(modifier = Modifier.padding(8.dp)) {
+            Column(
+                modifier = Modifier
+                    .background(CardDefaults.cardColors().containerColor)
+                    .padding(8.dp)
+            ) {
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
@@ -263,33 +258,28 @@ private fun SavedItem(
                 }
             }
         },
-        hiddenContent = { hideContainer ->
-            SwipeRevealCardButton(
-                iconImage = Icons.TwoTone.Flag,
-                iconDescription = "Flag Location",
-                backgroundColor = Color(0xF7FFB300)
-            ) {
-                println("Rez Click 1")
-                hideContainer()
-            }
-
-            SwipeRevealCardButton(
+        leadingHiddenContent = { swipeState ->
+            SwipeToDismissCardIcon(
+                swipeToDismissBoxState = swipeState,
                 iconImage = Icons.TwoTone.Refresh,
-                iconDescription = "Flag Location",
-                backgroundColor = Color(0xD86B3A86)
-            ) {
-                println("Rez Click 2")
-                hideContainer()
-            }
-
-            SwipeRevealCardButton(
+                iconDescription = "Refresh item",
+                backgroundColor = Color(0xF7FFB300)
+            )
+        },
+        onLeadingSwipe = {
+            println("Rez R")
+        },
+        trailingHiddenContent = { swipeState ->
+            SwipeToDismissCardIcon(
+                swipeToDismissBoxState = swipeState,
                 iconImage = Icons.TwoTone.Delete,
-                iconDescription = "Flag Location",
-                backgroundColor = MaterialTheme.colorScheme.error
-            ) {
-                println("Rez Click 3")
-                hideContainer()
-            }
+                iconDescription = "Remove item",
+                backgroundColor = MaterialTheme.colorScheme.error,
+            )
+
+        },
+        onTrailingSwipe = {
+            println("Rez D")
         }
     )
 }
@@ -384,9 +374,7 @@ private fun SearchedItemPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun SavedItemPreview() {
-    val manager: SwipeRevealCardManager = rememberSwipeRevealCardManager()
     SavedItem(
         savedItem = SavedItemUiState(),
-        manager = manager
     )
 }
