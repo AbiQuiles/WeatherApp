@@ -8,8 +8,7 @@ import com.example.weather.models.ui.search.SearchItemUiState
 import com.example.weather.models.ui.search.SearchListItem
 import com.example.weather.models.ui.search.SearchListUiState
 import com.example.weather.models.ui.search.searchbar.SearchBarUiState
-import com.example.weather.repository.LocationSavedRepository
-import com.example.weather.repository.LocationSupportedRepository
+import com.example.weather.repository.LocationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,8 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val savedRepository: LocationSavedRepository,
-    private val supportedRepository: LocationSupportedRepository,
+    private val locationRepository: LocationRepository
 ) : ViewModel() {
     private val _searchBarUiState: MutableStateFlow<SearchBarUiState> = MutableStateFlow(SearchBarUiState())
     val searchBarUiState: StateFlow<SearchBarUiState> = _searchBarUiState.asStateFlow()
@@ -60,7 +58,7 @@ class SearchViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            savedRepository.getAllLocations()
+            locationRepository.getAllLocations()
                 .distinctUntilChanged()
                 .collect { savedItems ->
                     _savedLocations.value = savedItems.toSet()
@@ -68,7 +66,7 @@ class SearchViewModel @Inject constructor(
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            supportedRepository.getAllLocationSupported()
+            locationRepository.getAllLocationSupported()
                 .collect { supportedItems ->
                     _supportedLocations.value = supportedItems.toSet()
                 }
@@ -93,6 +91,13 @@ class SearchViewModel @Inject constructor(
         }
     }
 
+    fun onDeleteLocation(location: String, deleteSuccess: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val deleteSuccess: Boolean = locationRepository.deleteLocation(location = location)
+            deleteSuccess(deleteSuccess)
+        }
+    }
+
     fun onDismissBottomSheet() = _modalSheetUiState.update { uiState ->
         uiState.copy(showSheet = false)
     }
@@ -104,7 +109,6 @@ class SearchViewModel @Inject constructor(
 
         clearSearch()
     }
-
 
     fun setSearchBarText(text: String) = _searchBarUiState.update { uiState ->
         uiState.copy(

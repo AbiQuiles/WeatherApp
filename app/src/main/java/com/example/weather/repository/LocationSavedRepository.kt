@@ -56,5 +56,14 @@ class LocationSavedRepository @Inject constructor(
     }
 
     suspend fun updateLocation(entity: LocationSavedEntity) = locationSavedDao.update(entity)
-    suspend fun deleteLocation(entity: LocationSavedEntity) = locationSavedDao.delete(entity)
+
+    suspend fun deleteLocation(location: String): Boolean {
+        return try {
+            locationSavedDao.deleteByName(name = location)
+            true
+        } catch (e: Exception) {
+            Log.e("LocationSavedRepository", "Delete locations attempt error: ${e.message}", e)
+            false
+        }
+    }
 }

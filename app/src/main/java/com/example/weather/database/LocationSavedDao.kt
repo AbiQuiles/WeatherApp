@@ -29,4 +29,7 @@ interface LocationSavedDao {
 
     @Delete
     suspend fun delete(entity: LocationSavedEntity)
+
+    @Query(value = "DELETE FROM location_saved_tbl WHERE location_name = :name")
+    suspend fun deleteByName(name: String)
 }

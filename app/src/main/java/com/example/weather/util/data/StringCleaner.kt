@@ -1,8 +1,8 @@
 package com.example.weather.util.data
 
-fun cleanString(dirtyName: String): String {
+fun cleanString(rawString: String): String {
     val unwantedSymbolsRegex = Regex("[\\s\\-().°]+")
-    return dirtyName
+    return rawString
         .trim()
         .lowercase()
         .replace(unwantedSymbolsRegex, "")

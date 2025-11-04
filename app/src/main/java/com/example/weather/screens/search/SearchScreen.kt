@@ -29,6 +29,7 @@ package com.example.weather.screens.search
  import androidx.compose.material3.MaterialTheme
  import androidx.compose.material3.ModalBottomSheet
  import androidx.compose.material3.Scaffold
+ import androidx.compose.material3.SnackbarHost
  import androidx.compose.material3.Text
  import androidx.compose.material3.rememberModalBottomSheetState
  import androidx.compose.runtime.Composable
@@ -44,6 +45,7 @@ package com.example.weather.screens.search
  import androidx.compose.ui.unit.sp
  import androidx.hilt.navigation.compose.hiltViewModel
  import androidx.navigation.NavController
+ import com.example.weather.models.ui.search.SavedItemEvents
  import com.example.weather.models.ui.search.SavedItemUiState
  import com.example.weather.models.ui.search.SearchItemUiState
  import com.example.weather.models.ui.search.SearchListItem
@@ -52,6 +54,7 @@ package com.example.weather.screens.search
  import com.example.weather.screens.main.WeatherModalScreen
  import com.example.weather.widgets.SwipeToDismissCard
  import com.example.weather.widgets.SwipeToDismissCardIcon
+ import com.example.weather.widgets.rememberSnackbarManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +62,7 @@ fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel
     val searchBarUiState by viewModel.searchBarUiState.collectAsState()
     val searchResultListUiState by viewModel.searchListUiState.collectAsState()
     val modalSheetUiState by viewModel.modalSheetUiState.collectAsState()
+    val snackbarManager = rememberSnackbarManager()
 
     Scaffold(
         topBar = {
@@ -71,6 +75,9 @@ fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel
                     onExitRoute = { navController.popBackStack() }
                 ),
             )
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarManager.snackbarHostState)
         },
         containerColor = MaterialTheme.colorScheme.surface
     ) { innerPadding ->
@@ -89,6 +96,16 @@ fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel
                     ?.set(AppNavKeys.LOCATION_NAME, locationClicked)
 
                 navController.popBackStack()*/
+            },
+            onLeadingSwipe = { },
+            onTrailingSwipe = { location ->
+                viewModel.onDeleteLocation(location) { deleteSuccess ->
+                    if (deleteSuccess) {
+                        snackbarManager.showSnackbar("Location deleted")
+                    } else {
+                        snackbarManager.showSnackbar("Failed to delete location")
+                    }
+                }
             },
         ) {
             if (modalSheetUiState.showSheet) {
@@ -138,6 +155,8 @@ private fun MainLayout(
     searchListUiState: SearchListUiState,
     searchText: String,
     onLocationSelected: (String, Boolean) -> Unit,
+    onLeadingSwipe: (String) -> Unit,
+    onTrailingSwipe: (String) -> Unit,
     modalBottomSheet: @Composable () -> Unit
 ) {
     val searchItems: List<SearchListItem> = searchListUiState.items.toList()
@@ -163,7 +182,13 @@ private fun MainLayout(
 
                 items(searchItems) { item ->
                     if (searchText.isEmpty() && item is SavedItemUiState) {
-                        SavedItem(savedItem = item)
+                        SavedItem(
+                            savedItem = item,
+                            savedItemEvents = SavedItemEvents(
+                                onLeadingSwipe = { locationName-> onLeadingSwipe(locationName) },
+                                onTrailingSwipe = { locationName-> onTrailingSwipe(locationName) }
+                            )
+                        )
                     } else if (searchText.isNotEmpty() && item is SearchItemUiState) {
                         SearchedItem(searchItem = item) { locationClicked, isLocationSaved ->
                             onLocationSelected(locationClicked, isLocationSaved)
@@ -216,7 +241,10 @@ private fun NoLocationFoundView(
 }
 
 @Composable
-private fun SavedItem(savedItem: SavedItemUiState) {
+private fun SavedItem(
+    savedItem: SavedItemUiState,
+    savedItemEvents: SavedItemEvents
+) {
     SwipeToDismissCard(
         frontContent = {
             Column(
@@ -267,7 +295,7 @@ private fun SavedItem(savedItem: SavedItemUiState) {
             )
         },
         onLeadingSwipe = {
-            println("Rez R")
+            savedItemEvents.onLeadingSwipe(savedItem.name)
         },
         trailingHiddenContent = { swipeState ->
             SwipeToDismissCardIcon(
@@ -279,7 +307,7 @@ private fun SavedItem(savedItem: SavedItemUiState) {
 
         },
         onTrailingSwipe = {
-            println("Rez D")
+            savedItemEvents.onTrailingSwipe(savedItem.name)
         }
     )
 }
@@ -322,6 +350,8 @@ private fun MainLayoutWithSavedItemsPreview() {
         searchListUiState = mockSearchListUiState,
         searchText = "",
         onLocationSelected = { _, _ -> },
+        onLeadingSwipe = {},
+        onTrailingSwipe = {},
         modalBottomSheet = { }
     )
 }
@@ -337,6 +367,8 @@ private fun MainLayoutWithSearchItemsPreview() {
         searchListUiState = mockSearchListUiState,
         searchText = "Not Empty",
         onLocationSelected = { _, _ -> },
+        onLeadingSwipe = {},
+        onTrailingSwipe = {},
         modalBottomSheet = { }
     )
 }
@@ -348,6 +380,8 @@ private fun MainLayoutWithNoSaveViewPreview() {
         searchListUiState = SearchListUiState(),
         searchText = "",
         onLocationSelected = { _, _ -> },
+        onLeadingSwipe = {},
+        onTrailingSwipe = {},
         modalBottomSheet = { }
     )
 }
@@ -359,6 +393,8 @@ private fun MainLayoutWithNoResultViewPreview() {
         searchListUiState = SearchListUiState(),
         searchText = "Location",
         onLocationSelected = { _, _ -> },
+        onLeadingSwipe = {},
+        onTrailingSwipe = {},
         modalBottomSheet = { }
     )
 }
@@ -376,5 +412,9 @@ private fun SearchedItemPreview() {
 private fun SavedItemPreview() {
     SavedItem(
         savedItem = SavedItemUiState(),
+        savedItemEvents = SavedItemEvents(
+            onLeadingSwipe = { },
+            onTrailingSwipe = { }
+        )
     )
 }
