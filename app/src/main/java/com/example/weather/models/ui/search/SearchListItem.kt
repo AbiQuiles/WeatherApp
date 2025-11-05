@@ -1,3 +1,7 @@
 package com.example.weather.models.ui.search
 
-sealed interface SearchListItem
+import java.util.UUID
+
+sealed interface SearchListItem {
+    val id: UUID
+}

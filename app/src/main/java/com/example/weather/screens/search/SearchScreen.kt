@@ -1,5 +1,7 @@
 package com.example.weather.screens.search
 
+ import androidx.compose.animation.animateContentSize
+ import androidx.compose.foundation.ExperimentalFoundationApi
  import androidx.compose.foundation.background
  import androidx.compose.foundation.clickable
  import androidx.compose.foundation.layout.Arrangement
@@ -55,6 +57,7 @@ package com.example.weather.screens.search
  import com.example.weather.widgets.SwipeToDismissCard
  import com.example.weather.widgets.SwipeToDismissCardIcon
  import com.example.weather.widgets.rememberSnackbarManager
+ import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -149,6 +152,7 @@ fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MainLayout(
     modifier: Modifier = Modifier,
@@ -178,15 +182,21 @@ private fun MainLayout(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(6.dp)
+                    .animateContentSize()
             ) {
-
-                items(searchItems) { item ->
+                items(
+                    items = searchItems,
+                    key = { item -> item.id }
+                ) { item ->
                     if (searchText.isEmpty() && item is SavedItemUiState) {
                         SavedItem(
                             savedItem = item,
                             savedItemEvents = SavedItemEvents(
                                 onLeadingSwipe = { locationName-> onLeadingSwipe(locationName) },
-                                onTrailingSwipe = { locationName-> onTrailingSwipe(locationName) }
+                                onTrailingSwipe = { locationName-> onTrailingSwipe(locationName) },
+                            ),
+                            modifier = Modifier.animateItem(
+
                             )
                         )
                     } else if (searchText.isNotEmpty() && item is SearchItemUiState) {
@@ -243,9 +253,11 @@ private fun NoLocationFoundView(
 @Composable
 private fun SavedItem(
     savedItem: SavedItemUiState,
-    savedItemEvents: SavedItemEvents
+    savedItemEvents: SavedItemEvents,
+    modifier: Modifier = Modifier
 ) {
     SwipeToDismissCard(
+        modifier = modifier,
         frontContent = {
             Column(
                 modifier = Modifier
@@ -343,7 +355,7 @@ private fun SearchedItem(searchItem: SearchItemUiState, onLocationClick: (String
 @Composable
 private fun MainLayoutWithSavedItemsPreview() {
     val mockSearchListUiState = SearchListUiState(
-        items = setOf(SavedItemUiState())
+        items = setOf(SavedItemUiState(id = UUID.randomUUID()))
     )
 
     MainLayout(
@@ -360,7 +372,7 @@ private fun MainLayoutWithSavedItemsPreview() {
 @Composable
 private fun MainLayoutWithSearchItemsPreview() {
     val mockSearchListUiState = SearchListUiState(
-        items = setOf(SearchItemUiState())
+        items = setOf(SearchItemUiState(id = UUID.randomUUID()))
     )
 
     MainLayout(
@@ -402,7 +414,8 @@ private fun MainLayoutWithNoResultViewPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun SearchedItemPreview() {
-    SearchedItem(SearchItemUiState()) { _, _ ->
+    SearchedItem(SearchItemUiState(id = UUID.randomUUID())
+    ) { _, _ ->
 
     }
 }
@@ -411,7 +424,7 @@ private fun SearchedItemPreview() {
 @Composable
 private fun SavedItemPreview() {
     SavedItem(
-        savedItem = SavedItemUiState(),
+        savedItem = SavedItemUiState(id = UUID.randomUUID()),
         savedItemEvents = SavedItemEvents(
             onLeadingSwipe = { },
             onTrailingSwipe = { }

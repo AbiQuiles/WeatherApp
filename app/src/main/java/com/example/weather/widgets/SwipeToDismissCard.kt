@@ -34,6 +34,7 @@ fun SwipeToDismissCard(
     onLeadingSwipe: () -> Unit,
     trailingHiddenContent: @Composable (state: SwipeToDismissBoxState) -> Unit,
     onTrailingSwipe: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
 
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
@@ -55,7 +56,7 @@ fun SwipeToDismissCard(
     )
     Card(
         shape = MaterialTheme.shapes.small,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(6.dp)
     ) {

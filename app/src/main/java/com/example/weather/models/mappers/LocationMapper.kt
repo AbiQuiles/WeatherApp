@@ -7,6 +7,7 @@ import com.example.weather.models.ui.search.SavedItemUiState
 import com.example.weather.models.ui.search.SearchItemUiState
 
 fun LocationSavedEntity.toUiModel(): SavedItemUiState = SavedItemUiState(
+    id = this.id,
     name = this.name,
     descriptionTemp = this.descriptionTemp,
     currentTemp = this.currentTemp,
@@ -14,6 +15,7 @@ fun LocationSavedEntity.toUiModel(): SavedItemUiState = SavedItemUiState(
 )
 
 fun LocationSupportedEntity.toUiModel(): SearchItemUiState = SearchItemUiState(
+    id = this.id,
     name = this.name,
     saveTag = this.saveTag
 )
