@@ -8,7 +8,9 @@ import com.example.weather.models.ui.search.SearchItemUiState
 import com.example.weather.models.ui.search.SearchListItem
 import com.example.weather.models.ui.search.SearchListUiState
 import com.example.weather.models.ui.search.searchbar.SearchBarUiState
+import com.example.weather.models.ui.weather.CurrentWeatherUiState
 import com.example.weather.repository.LocationRepository
+import com.example.weather.repository.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +26,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
+    private val weatherRepository: WeatherRepository,
     private val locationRepository: LocationRepository
 ) : ViewModel() {
     private val _searchBarUiState: MutableStateFlow<SearchBarUiState> = MutableStateFlow(SearchBarUiState())
@@ -88,6 +91,27 @@ class SearchViewModel @Inject constructor(
                 isLocationSaved = isSaved,
                 showSheet = true
             )
+        }
+    }
+
+    fun onUpdateLocation(savedItemUiState: SavedItemUiState, updateSuccess: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            weatherRepository.getWeather(savedItemUiState.name).collect { weatherScreenUiState ->
+                val currentWeatherUiState: CurrentWeatherUiState? = weatherScreenUiState.currentWeather
+
+                if (currentWeatherUiState != null) {
+                    val updateSuccess: Boolean = locationRepository.updateLocationById(
+                        saveItemId = savedItemUiState.id,
+                        currentWeatherUiState = currentWeatherUiState
+                    )
+
+                    if (updateSuccess) {
+                        updateSuccess(true)
+                    } else {
+                        updateSuccess(false)
+                    }
+                }
+            }
         }
     }
 

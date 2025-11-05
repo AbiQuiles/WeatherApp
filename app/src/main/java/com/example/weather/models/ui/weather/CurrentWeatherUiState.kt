@@ -5,5 +5,5 @@ data class CurrentWeatherUiState(
     val currentTemp: String = "83",
     val tempDescription: String = "Sunny",
     val feelsLike: String = "86",
-    val highAndLowTemp: Pair<String, String> = Pair("200°", "-200°")
+    val lowAndHighTemp: Pair<String, String> = Pair("-200°", "200°")
 )

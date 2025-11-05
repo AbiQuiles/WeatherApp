@@ -6,6 +6,7 @@ import com.example.weather.models.ui.weather.CurrentWeatherUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import java.util.UUID
 import javax.inject.Inject
 
 class LocationRepository @Inject constructor(
@@ -26,6 +27,14 @@ class LocationRepository @Inject constructor(
             } else {
                 false
             }
+        }
+
+    suspend fun updateLocationById(saveItemId: UUID, currentWeatherUiState: CurrentWeatherUiState): Boolean =
+        withContext(Dispatchers.IO) {
+             locationSavedRepository.updateLocationById(
+                 saveItemId = saveItemId,
+                 currentWeatherUiState = currentWeatherUiState
+             )
         }
 
     suspend fun deleteLocation(location: String): Boolean =

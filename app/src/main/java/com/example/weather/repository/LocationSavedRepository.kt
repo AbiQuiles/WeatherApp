@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import java.util.UUID
 import javax.inject.Inject
 
 class LocationSavedRepository @Inject constructor(
@@ -43,8 +44,8 @@ class LocationSavedRepository @Inject constructor(
                 name = uiModel.city ,
                 descriptionTemp = uiModel.tempDescription,
                 currentTemp = cleanString(uiModel.currentTemp),
-                maxTemp = cleanString(uiModel.highAndLowTemp.second),
-                minTemp = cleanString(uiModel.highAndLowTemp.first)
+                maxTemp = cleanString(uiModel.lowAndHighTemp.second),
+                minTemp = cleanString(uiModel.lowAndHighTemp.first)
             )
 
             locationSavedDao.insert(entity)
@@ -55,7 +56,24 @@ class LocationSavedRepository @Inject constructor(
         }
     }
 
-    suspend fun updateLocation(entity: LocationSavedEntity) = locationSavedDao.update(entity)
+    suspend fun updateLocationById(saveItemId: UUID, currentWeatherUiState: CurrentWeatherUiState): Boolean {
+        return try {
+            val entity = LocationSavedEntity(
+                id = saveItemId,
+                name = currentWeatherUiState.city,
+                descriptionTemp = currentWeatherUiState.tempDescription,
+                currentTemp = cleanString(currentWeatherUiState.currentTemp),
+                maxTemp = cleanString(currentWeatherUiState.lowAndHighTemp.second),
+                minTemp = cleanString(currentWeatherUiState.lowAndHighTemp.first)
+            )
+
+            locationSavedDao.update(entity)
+            true
+        } catch (e: Exception) {
+            Log.e("LocationSavedRepository", "Update locations attempt error: ${e.message}", e)
+            false
+        }
+    }
 
     suspend fun deleteLocation(location: String): Boolean {
         return try {

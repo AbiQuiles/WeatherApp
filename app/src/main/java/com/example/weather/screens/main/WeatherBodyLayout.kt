@@ -53,7 +53,7 @@ fun WeatherBodyLayout(
                     currentTemp = currentWeatherUiState.currentTemp,
                     tempDescription = currentWeatherUiState.tempDescription,
                     feelsLike = currentWeatherUiState.feelsLike,
-                    highAndLowTemp = currentWeatherUiState.highAndLowTemp
+                    lowAndHighTemp = currentWeatherUiState.lowAndHighTemp
                 )
                 Spacer(modifier = Modifier.padding(6.dp))
                 WeekForecastCard(dailyForecastItemUiState = dailyForecastItemUiState)
@@ -70,7 +70,7 @@ private fun CurrentWeather(
     currentTemp: String,
     tempDescription: String,
     feelsLike: String,
-    highAndLowTemp: Pair<String, String>,
+    lowAndHighTemp: Pair<String, String>,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -101,7 +101,7 @@ private fun CurrentWeather(
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
-                text = "High ${highAndLowTemp.first} | Low ${highAndLowTemp.second}",
+                text = "Low ${lowAndHighTemp.first} | High ${lowAndHighTemp.second}",
                 fontSize = 18.sp
             )
         }
@@ -241,7 +241,7 @@ private fun CurrentWeatherPreview() {
         currentTemp = currentWeatherUiState.currentTemp,
         tempDescription = currentWeatherUiState.tempDescription,
         feelsLike = currentWeatherUiState.feelsLike,
-        highAndLowTemp = currentWeatherUiState.highAndLowTemp
+        lowAndHighTemp = currentWeatherUiState.lowAndHighTemp
 
     )
 }

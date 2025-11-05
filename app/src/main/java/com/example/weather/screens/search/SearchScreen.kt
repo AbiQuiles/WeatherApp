@@ -100,7 +100,15 @@ fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel
 
                 navController.popBackStack()*/
             },
-            onLeadingSwipe = { },
+            onLeadingSwipe = { savedItem ->
+                viewModel.onUpdateLocation(savedItem) { updateSuccess ->
+                    if (updateSuccess) {
+                        snackbarManager.showSnackbar("Location updated")
+                    } else {
+                        snackbarManager.showSnackbar("Failed to updated saved location")
+                    }
+                }
+            },
             onTrailingSwipe = { location ->
                 viewModel.onDeleteLocation(location) { deleteSuccess ->
                     if (deleteSuccess) {
@@ -159,7 +167,7 @@ private fun MainLayout(
     searchListUiState: SearchListUiState,
     searchText: String,
     onLocationSelected: (String, Boolean) -> Unit,
-    onLeadingSwipe: (String) -> Unit,
+    onLeadingSwipe: (SavedItemUiState) -> Unit,
     onTrailingSwipe: (String) -> Unit,
     modalBottomSheet: @Composable () -> Unit
 ) {
@@ -192,12 +200,10 @@ private fun MainLayout(
                         SavedItem(
                             savedItem = item,
                             savedItemEvents = SavedItemEvents(
-                                onLeadingSwipe = { locationName-> onLeadingSwipe(locationName) },
+                                onLeadingSwipe = { savedItem-> onLeadingSwipe(savedItem) },
                                 onTrailingSwipe = { locationName-> onTrailingSwipe(locationName) },
                             ),
-                            modifier = Modifier.animateItem(
-
-                            )
+                            modifier = Modifier.animateItem()
                         )
                     } else if (searchText.isNotEmpty() && item is SearchItemUiState) {
                         SearchedItem(searchItem = item) { locationClicked, isLocationSaved ->
@@ -307,7 +313,7 @@ private fun SavedItem(
             )
         },
         onLeadingSwipe = {
-            savedItemEvents.onLeadingSwipe(savedItem.name)
+            savedItemEvents.onLeadingSwipe(savedItem)
         },
         trailingHiddenContent = { swipeState ->
             SwipeToDismissCardIcon(

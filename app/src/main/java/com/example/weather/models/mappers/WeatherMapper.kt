@@ -19,14 +19,14 @@ fun WeatherDto.toUiModel(): CurrentWeatherUiState {
         val feelsLike = convertTempToUiModel(weatherLarge.feels_like.day)
         val dayMaxTemp = convertTempToUiModel(weatherLarge.temp.max)
         val dayMinTemp = convertTempToUiModel(weatherLarge.temp.min)
-        val highAndLowTemp = Pair(dayMaxTemp, dayMinTemp)
+        val lowAndHighTemp = Pair(dayMinTemp, dayMaxTemp)
 
         return CurrentWeatherUiState(
             city = city,
             currentTemp = currentTemp,
             tempDescription = tempDescription,
             feelsLike = feelsLike,
-            highAndLowTemp = highAndLowTemp,
+            lowAndHighTemp = lowAndHighTemp,
         )
 }
 
