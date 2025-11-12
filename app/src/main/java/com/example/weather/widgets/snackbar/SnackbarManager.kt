@@ -1,4 +1,4 @@
-package com.example.weather.widgets
+package com.example.weather.widgets.snackbar
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable

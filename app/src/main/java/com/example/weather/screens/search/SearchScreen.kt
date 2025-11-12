@@ -54,9 +54,9 @@ package com.example.weather.screens.search
  import com.example.weather.models.ui.search.SearchListUiState
  import com.example.weather.models.ui.search.searchbar.SearchBarEvents
  import com.example.weather.screens.main.WeatherModalScreen
- import com.example.weather.widgets.SwipeToDismissCard
- import com.example.weather.widgets.SwipeToDismissCardIcon
- import com.example.weather.widgets.rememberSnackbarManager
+ import com.example.weather.widgets.snackbar.rememberSnackbarManager
+ import com.example.weather.widgets.swipe.cards.SwipeToDismissCard
+ import com.example.weather.widgets.swipe.cards.SwipeToDismissCardIcon
  import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,6 +65,7 @@ fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel
     val searchBarUiState by viewModel.searchBarUiState.collectAsState()
     val searchResultListUiState by viewModel.searchListUiState.collectAsState()
     val modalSheetUiState by viewModel.modalSheetUiState.collectAsState()
+    val snackbarUiState by viewModel.snackbarShow.collectAsState()
     val snackbarManager = rememberSnackbarManager()
 
     Scaffold(
@@ -88,11 +89,8 @@ fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel
             modifier = Modifier.padding(innerPadding),
             searchListUiState = searchResultListUiState,
             searchText = searchBarUiState.searchText,
-            onLocationSelected = { locationSelected, isLocationSaved ->
-                viewModel.onLocationSelected(
-                    location = locationSelected,
-                    isSaved = isLocationSaved
-                )
+            onSearchItemSelected = { searchItem ->
+                viewModel.onSearchItemSelected(searchItem)
 
                 /*navController.previousBackStackEntry
                     ?.savedStateHandle
@@ -100,17 +98,24 @@ fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel
 
                 navController.popBackStack()*/
             },
+            onSavedItemSelected = { savedItem ->
+                viewModel.onSavedItemSelected(savedItem)
+                if (snackbarUiState) {
+                    snackbarManager.showSnackbar("Location updated")
+                } else {
+                    snackbarManager.showSnackbar("Failed to updated saved location")
+                }
+            },
             onLeadingSwipe = { savedItem ->
-                viewModel.onUpdateLocation(savedItem) { updateSuccess ->
-                    if (updateSuccess) {
+                viewModel.onUpdateSavedLocation(savedItem)
+                    if (snackbarUiState) {
                         snackbarManager.showSnackbar("Location updated")
                     } else {
                         snackbarManager.showSnackbar("Failed to updated saved location")
                     }
-                }
             },
-            onTrailingSwipe = { location ->
-                viewModel.onDeleteLocation(location) { deleteSuccess ->
+            onTrailingSwipe = { savedItem ->
+                viewModel.onDeleteLocation(savedItem) { deleteSuccess ->
                     if (deleteSuccess) {
                         snackbarManager.showSnackbar("Location deleted")
                     } else {
@@ -166,9 +171,10 @@ private fun MainLayout(
     modifier: Modifier = Modifier,
     searchListUiState: SearchListUiState,
     searchText: String,
-    onLocationSelected: (String, Boolean) -> Unit,
+    onSearchItemSelected: (SearchItemUiState) -> Unit,
+    onSavedItemSelected: (SavedItemUiState) -> Unit,
     onLeadingSwipe: (SavedItemUiState) -> Unit,
-    onTrailingSwipe: (String) -> Unit,
+    onTrailingSwipe: (SavedItemUiState) -> Unit,
     modalBottomSheet: @Composable () -> Unit
 ) {
     val searchItems: List<SearchListItem> = searchListUiState.items.toList()
@@ -200,14 +206,15 @@ private fun MainLayout(
                         SavedItem(
                             savedItem = item,
                             savedItemEvents = SavedItemEvents(
+                                onClick = { savedItem -> onSavedItemSelected(savedItem) },
                                 onLeadingSwipe = { savedItem-> onLeadingSwipe(savedItem) },
-                                onTrailingSwipe = { locationName-> onTrailingSwipe(locationName) },
+                                onTrailingSwipe = { savedItem-> onTrailingSwipe(savedItem) },
                             ),
                             modifier = Modifier.animateItem()
                         )
                     } else if (searchText.isNotEmpty() && item is SearchItemUiState) {
-                        SearchedItem(searchItem = item) { locationClicked, isLocationSaved ->
-                            onLocationSelected(locationClicked, isLocationSaved)
+                        SearchedItem(searchItem = item) { searchItem ->
+                            onSearchItemSelected(searchItem)
                         }
                     }
                 }
@@ -269,6 +276,9 @@ private fun SavedItem(
                 modifier = Modifier
                     .background(CardDefaults.cardColors().containerColor)
                     .padding(8.dp)
+                    .clickable(onClick = {
+                        savedItemEvents.onClick(savedItem)
+                    })
             ) {
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -325,13 +335,13 @@ private fun SavedItem(
 
         },
         onTrailingSwipe = {
-            savedItemEvents.onTrailingSwipe(savedItem.name)
+            savedItemEvents.onTrailingSwipe(savedItem)
         }
     )
 }
 
 @Composable
-private fun SearchedItem(searchItem: SearchItemUiState, onLocationClick: (String, Boolean) -> Unit) {
+private fun SearchedItem(searchItem: SearchItemUiState, onSearchItemClick: (SearchItemUiState) -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(18.dp),
@@ -339,10 +349,7 @@ private fun SearchedItem(searchItem: SearchItemUiState, onLocationClick: (String
             .fillMaxWidth()
             .padding(12.dp)
             .clickable(onClick = {
-                onLocationClick(
-                    searchItem.name,
-                    searchItem.saveTag
-                )
+                onSearchItemClick(searchItem)
             })
     ) {
         Icon(
@@ -367,10 +374,11 @@ private fun MainLayoutWithSavedItemsPreview() {
     MainLayout(
         searchListUiState = mockSearchListUiState,
         searchText = "",
-        onLocationSelected = { _, _ -> },
+        onSearchItemSelected = {},
+        onSavedItemSelected = {},
         onLeadingSwipe = {},
         onTrailingSwipe = {},
-        modalBottomSheet = { }
+        modalBottomSheet = {}
     )
 }
 
@@ -384,7 +392,8 @@ private fun MainLayoutWithSearchItemsPreview() {
     MainLayout(
         searchListUiState = mockSearchListUiState,
         searchText = "Not Empty",
-        onLocationSelected = { _, _ -> },
+        onSearchItemSelected = {},
+        onSavedItemSelected = {},
         onLeadingSwipe = {},
         onTrailingSwipe = {},
         modalBottomSheet = { }
@@ -397,7 +406,8 @@ private fun MainLayoutWithNoSaveViewPreview() {
     MainLayout(
         searchListUiState = SearchListUiState(),
         searchText = "",
-        onLocationSelected = { _, _ -> },
+        onSearchItemSelected = {},
+        onSavedItemSelected = {},
         onLeadingSwipe = {},
         onTrailingSwipe = {},
         modalBottomSheet = { }
@@ -410,7 +420,8 @@ private fun MainLayoutWithNoResultViewPreview() {
     MainLayout(
         searchListUiState = SearchListUiState(),
         searchText = "Location",
-        onLocationSelected = { _, _ -> },
+        onSearchItemSelected = {},
+        onSavedItemSelected = {},
         onLeadingSwipe = {},
         onTrailingSwipe = {},
         modalBottomSheet = { }
@@ -421,7 +432,7 @@ private fun MainLayoutWithNoResultViewPreview() {
 @Composable
 private fun SearchedItemPreview() {
     SearchedItem(SearchItemUiState(id = UUID.randomUUID())
-    ) { _, _ ->
+    ) {
 
     }
 }
@@ -432,6 +443,7 @@ private fun SavedItemPreview() {
     SavedItem(
         savedItem = SavedItemUiState(id = UUID.randomUUID()),
         savedItemEvents = SavedItemEvents(
+            onClick = { },
             onLeadingSwipe = { },
             onTrailingSwipe = { }
         )

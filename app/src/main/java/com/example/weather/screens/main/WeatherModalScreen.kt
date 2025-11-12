@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.weather.models.ui.weather.CurrentWeatherUiState
 import com.example.weather.models.ui.weather.DailyForecastItemUiState
-import com.example.weather.widgets.rememberSnackbarManager
+import com.example.weather.widgets.snackbar.rememberSnackbarManager
 
 @Composable
 fun WeatherModalScreen(

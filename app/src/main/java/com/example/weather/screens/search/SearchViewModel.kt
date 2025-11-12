@@ -35,6 +35,9 @@ class SearchViewModel @Inject constructor(
     private val _modalSheetUiState: MutableStateFlow<ModalSheetUiState> = MutableStateFlow(ModalSheetUiState())
     val modalSheetUiState: StateFlow<ModalSheetUiState> = _modalSheetUiState.asStateFlow()
 
+    private val _snackbarShow: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val snackbarShow: StateFlow<Boolean> = _snackbarShow.asStateFlow()
+
     private val _savedLocations: MutableStateFlow<Set<SavedItemUiState>> = MutableStateFlow(emptySet())
     private val _supportedLocations: MutableStateFlow<Set<SearchItemUiState>> = MutableStateFlow(emptySet())
 
@@ -84,17 +87,29 @@ class SearchViewModel @Inject constructor(
         setSearchBarLoadingState(false)
     }
 
-    fun onLocationSelected(location: String, isSaved: Boolean) {
+    fun onSearchItemSelected(searchItem: SearchItemUiState) {
         _modalSheetUiState.update { uiState ->
             uiState.copy(
-                locationSelected = location,
-                isLocationSaved = isSaved,
+                locationSelected = searchItem.name,
+                isLocationSaved = searchItem.saveTag,
                 showSheet = true
             )
         }
     }
 
-    fun onUpdateLocation(savedItemUiState: SavedItemUiState, updateSuccess: (Boolean) -> Unit) {
+    fun onSavedItemSelected(savedItemUiState: SavedItemUiState) {
+        _modalSheetUiState.update { uiState ->
+            uiState.copy(
+                locationSelected = savedItemUiState.name,
+                isLocationSaved = true,
+                showSheet = true
+            )
+        }
+
+        onUpdateSavedLocation(savedItemUiState)
+    }
+
+    fun onUpdateSavedLocation(savedItemUiState: SavedItemUiState) {
         viewModelScope.launch {
             weatherRepository.getWeather(savedItemUiState.name).collect { weatherScreenUiState ->
                 val currentWeatherUiState: CurrentWeatherUiState? = weatherScreenUiState.currentWeather
@@ -105,19 +120,15 @@ class SearchViewModel @Inject constructor(
                         currentWeatherUiState = currentWeatherUiState
                     )
 
-                    if (updateSuccess) {
-                        updateSuccess(true)
-                    } else {
-                        updateSuccess(false)
-                    }
+                    _snackbarShow.value = updateSuccess
                 }
             }
         }
     }
 
-    fun onDeleteLocation(location: String, deleteSuccess: (Boolean) -> Unit) {
+    fun onDeleteLocation(savedItem: SavedItemUiState, deleteSuccess: (Boolean) -> Unit) {
         viewModelScope.launch {
-            val deleteSuccess: Boolean = locationRepository.deleteLocation(location = location)
+            val deleteSuccess: Boolean = locationRepository.deleteLocation(location = savedItem.name)
             deleteSuccess(deleteSuccess)
         }
     }
