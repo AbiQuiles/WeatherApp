@@ -37,12 +37,7 @@ private fun NavGraphBuilder.splashScreen(navController: NavController) {
 
 private fun NavGraphBuilder.mainScreen(navController: NavController) {
     composable(route = AppRoutes.MainScreen.name) { navBackStackEntry ->
-        val locationName: String? = navBackStackEntry.savedStateHandle.get<String>(AppNavKeys.LOCATION_NAME)
-
-        WeatherScreen(
-            navController = navController,
-            locationName = locationName
-        )
+        WeatherScreen(navController = navController)
     }
 }
 

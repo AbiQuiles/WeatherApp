@@ -17,6 +17,9 @@ hiltNavigation = "1.2.0"
 
 roomAndroid = "2.7.2"
 
+accompanistPerm = "0.32.0"
+playServicesLocation = "21.0.1"
+
 ksp = "2.1.21-2.0.1"
 kotlinSerialization = "1.9.0"
 agp = "8.11.0"
@@ -56,6 +59,9 @@ hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", ve
 
 room-runtime-android = { module = "androidx.room:room-runtime", version.ref = "roomAndroid"}
 room-android-compiler = { module = "androidx.room:room-compiler", version.ref = "roomAndroid"}
+
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPerm"}
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation"}
 
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

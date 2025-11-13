@@ -87,6 +87,12 @@ dependencies {
     //Annotation Processing Tool (Use for Room, Hilt and anything that uses annotations
     ksp(libs.hilt.android.compiler)
 
+    // Accompanist Permissions
+    implementation(libs.accompanist.permissions)
+
+    // Google Play Services Location
+    implementation(libs.play.services.location)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

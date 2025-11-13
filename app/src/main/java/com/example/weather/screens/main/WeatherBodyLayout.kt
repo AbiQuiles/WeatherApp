@@ -39,27 +39,36 @@ fun WeatherBodyLayout(
     loadingState: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    LazyColumn(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top,
-        modifier = modifier
-            .fillMaxSize()
-            .padding(12.dp)
-    ) {
-        item {
-            if (!loadingState && currentWeatherUiState != null) {
-                CurrentWeather(
-                    location = currentWeatherUiState.city,
-                    currentTemp = currentWeatherUiState.currentTemp,
-                    tempDescription = currentWeatherUiState.tempDescription,
-                    feelsLike = currentWeatherUiState.feelsLike,
-                    lowAndHighTemp = currentWeatherUiState.lowAndHighTemp
-                )
-                Spacer(modifier = Modifier.padding(6.dp))
-                WeekForecastCard(dailyForecastItemUiState = dailyForecastItemUiState)
-            } else {
-                CircularProgressIndicator(modifier = modifier)
+    if (!loadingState && currentWeatherUiState != null) {
+        LazyColumn(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top,
+            modifier = modifier
+                .fillMaxSize()
+                .padding(12.dp)
+        ) {
+            item {
+                if (!loadingState) {
+                    CurrentWeather(
+                        location = currentWeatherUiState.city,
+                        currentTemp = currentWeatherUiState.currentTemp,
+                        tempDescription = currentWeatherUiState.tempDescription,
+                        feelsLike = currentWeatherUiState.feelsLike,
+                        lowAndHighTemp = currentWeatherUiState.lowAndHighTemp
+                    )
+                    Spacer(modifier = Modifier.padding(6.dp))
+                    WeekForecastCard(dailyForecastItemUiState = dailyForecastItemUiState)
+                }
             }
+        }
+    } else {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            CircularProgressIndicator()
+            Text(text = "Fetching location...", modifier = Modifier.padding(top = 8.dp))
         }
     }
 }

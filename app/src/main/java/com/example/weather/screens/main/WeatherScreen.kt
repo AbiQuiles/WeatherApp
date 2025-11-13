@@ -21,7 +21,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,8 +39,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.weather.models.ui.weather.CurrentWeatherUiState
 import com.example.weather.models.ui.weather.DailyForecastItemUiState
-import com.example.weather.navigation.AppNavKeys
 import com.example.weather.navigation.AppRoutes
+import com.example.weather.screens.location.permission.LocationPermissionPrompt
 import com.example.weather.widgets.FloatingModal
 import com.example.weather.widgets.SwitcherRow
 
@@ -49,7 +48,6 @@ import com.example.weather.widgets.SwitcherRow
 fun WeatherScreen(
     navController: NavController,
     viewModel: WeatherViewModel = hiltViewModel(),
-    locationName: String?
 ) {
     val currentWeatherUiState by viewModel.currentWeatherUiState.collectAsState()
     val dailyForecastItemUiState by viewModel.dailyForecastItemUiState.collectAsState()
@@ -60,28 +58,19 @@ fun WeatherScreen(
             mutableStateOf(false)
     }
 
-    LaunchedEffect(locationName) {
-        if (locationName != null) {
-            viewModel.getSelectedWeather(locationName)
-
-            //Clear value from the savedStateHandle
-            navController.currentBackStackEntry
-                ?.savedStateHandle
-                ?.remove<String>(AppNavKeys.LOCATION_NAME)
-        }
-    }
-
     Scaffold(
         topBar = {
             TopBar(navController = navController)
         }
     ) { innerPadding ->
+        LocationPermissionPrompt {
             WeatherBodyLayout(
                 currentWeatherUiState = currentWeatherUiState,
                 dailyForecastItemUiState = dailyForecastItemUiState,
                 loadingState = loadingState,
                 modifier = Modifier.padding(innerPadding)
             )
+        }
     }
 }
 

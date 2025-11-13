@@ -64,7 +64,7 @@ class SearchViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            locationRepository.getAllLocations()
+            locationRepository.getAllLocationsSaved()
                 .distinctUntilChanged()
                 .collect { savedItems ->
                     _savedLocations.value = savedItems.toSet()
@@ -115,7 +115,7 @@ class SearchViewModel @Inject constructor(
                 val currentWeatherUiState: CurrentWeatherUiState? = weatherScreenUiState.currentWeather
 
                 if (currentWeatherUiState != null) {
-                    val updateSuccess: Boolean = locationRepository.updateLocationById(
+                    val updateSuccess: Boolean = locationRepository.updateLocationSavedById(
                         saveItemId = savedItemUiState.id,
                         currentWeatherUiState = currentWeatherUiState
                     )
@@ -128,7 +128,7 @@ class SearchViewModel @Inject constructor(
 
     fun onDeleteLocation(savedItem: SavedItemUiState, deleteSuccess: (Boolean) -> Unit) {
         viewModelScope.launch {
-            val deleteSuccess: Boolean = locationRepository.deleteLocation(location = savedItem.name)
+            val deleteSuccess: Boolean = locationRepository.deleteLocationSaved(location = savedItem.name)
             deleteSuccess(deleteSuccess)
         }
     }
