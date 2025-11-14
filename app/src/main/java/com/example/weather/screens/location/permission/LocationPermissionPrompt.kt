@@ -40,10 +40,17 @@ fun LocationPermissionPrompt(
     val context = LocalContext.current
     var permissionState by remember { mutableStateOf<PermissionStatus>(PermissionStatus.Undetermined) }
 
+    //Request Permission
     val launcher = rememberLauncherForActivityResult(
+        //Specifies that the launcher's job is to request a single permission
         contract = ActivityResultContracts.RequestPermission(),
+        //Callback that executes after the user responds to the permission dialog
         onResult = { isGranted ->
-            permissionState = if (isGranted) PermissionStatus.Granted else PermissionStatus.Denied
+            permissionState = if (isGranted) {
+                PermissionStatus.Granted
+            } else {
+                PermissionStatus.Denied
+            }
         }
     )
 
@@ -60,7 +67,6 @@ fun LocationPermissionPrompt(
         launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
-    // Pass the state down to the stateless content composable
     LocationPermissionContent(
         permissionStatus = permissionState,
         onPermissionGrantedContext = onPermissionGrantedContext,
