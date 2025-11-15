@@ -100,11 +100,6 @@ fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel
             },
             onSavedItemSelected = { savedItem ->
                 viewModel.onSavedItemSelected(savedItem)
-                if (snackbarUiState) {
-                    snackbarManager.showSnackbar("Location updated")
-                } else {
-                    snackbarManager.showSnackbar("Failed to updated saved location")
-                }
             },
             onLeadingSwipe = { savedItem ->
                 viewModel.onUpdateSavedLocation(savedItem)
