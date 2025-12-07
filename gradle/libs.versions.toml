@@ -20,6 +20,9 @@ roomAndroid = "2.7.2"
 accompanistPerm = "0.32.0"
 playServicesLocation = "21.0.1"
 
+firebaseBom = "34.6.0"
+googleServices = "4.4.4"
+
 ksp = "2.1.21-2.0.1"
 kotlinSerialization = "1.9.0"
 agp = "8.11.0"
@@ -39,29 +42,40 @@ androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerialization" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 
+# Coil
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilCompose" }
 
+# Retrofit
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 
+# Kotline Coroutines
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutinesCore" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutinesCore" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutinesCore" }
 
+# Android ViewModel
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewModel" }
 
+# Android Hilt
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "daggerHilt" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "daggerHilt" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigation" }
 
+# Room ORM
 room-runtime-android = { module = "androidx.room:room-runtime", version.ref = "roomAndroid"}
 room-android-compiler = { module = "androidx.room:room-compiler", version.ref = "roomAndroid"}
 
+# Google Location Services and Permissions
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPerm"}
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation"}
+
+# Firebase Cloude Services
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-remote-config = { module = "com.google.firebase:firebase-config" }
 
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -88,4 +102,6 @@ android-room = {id = "androidx.room", version.ref = "roomAndroid"}
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
+google-services = {id = "com.google.gms.google-services" , version.ref = "googleServices"}
 

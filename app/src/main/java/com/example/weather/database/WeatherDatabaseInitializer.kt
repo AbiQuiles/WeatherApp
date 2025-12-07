@@ -23,6 +23,7 @@ class WeatherDatabaseInitializer @Inject constructor(
 
     suspend fun initializeDatabase() {
         //Check if the DB has been already populated
+        println("Rez ${locationSupportedDao.count()}")
         if (locationSupportedDao.count() == 0) {
             val dtoList: List<LocationSupportedDto> = getLocationSupportedDTOs()
 

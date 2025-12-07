@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.devtool.ksp) //Kotlin Annotation Precessing Tool
     alias(libs.plugins.dagger.hilt) //Hilt
     alias(libs.plugins.android.room) //Room
+    alias(libs.plugins.google.services) // Google Services - For Firebase Services
 }
 
 android {
@@ -92,6 +93,10 @@ dependencies {
 
     // Google Play Services Location
     implementation(libs.play.services.location)
+
+    // Firebase Cloud Services
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.remote.config) // Firebase Remote Config
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

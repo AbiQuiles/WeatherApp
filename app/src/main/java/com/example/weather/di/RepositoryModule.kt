@@ -1,4 +1,4 @@
-package com.example.weather.di.repositories
+package com.example.weather.di
 
 import com.example.weather.database.LocationSavedDao
 import com.example.weather.database.LocationSupportedDao
