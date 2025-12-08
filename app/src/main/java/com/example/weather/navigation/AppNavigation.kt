@@ -9,7 +9,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.weather.screens.WeatherSplashScreen
 import com.example.weather.screens.main.WeatherScreen
 import com.example.weather.screens.search.WeatherSearchScreen
 
@@ -21,17 +20,8 @@ fun AppNavigation() {
         navController = navController,
         startDestination = AppRoutes.MainScreen.name,
     ) {
-        //splashScreen(navController = navController)
         mainScreen(navController = navController)
         searchScreen(navController = navController)
-    }
-}
-
-//!! Might Change
-//Currently Not Used - Went with Android Default Icon Splash Screen
-private fun NavGraphBuilder.splashScreen(navController: NavController) {
-    composable(route = AppRoutes.SplashScreen.name) {
-        WeatherSplashScreen(navController = navController)
     }
 }
 

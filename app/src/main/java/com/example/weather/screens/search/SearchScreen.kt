@@ -91,12 +91,6 @@ fun WeatherSearchScreen(navController: NavController, viewModel: SearchViewModel
             searchText = searchBarUiState.searchText,
             onSearchItemSelected = { searchItem ->
                 viewModel.onSearchItemSelected(searchItem)
-
-                /*navController.previousBackStackEntry
-                    ?.savedStateHandle
-                    ?.set(AppNavKeys.LOCATION_NAME, locationClicked)
-
-                navController.popBackStack()*/
             },
             onSavedItemSelected = { savedItem ->
                 viewModel.onSavedItemSelected(savedItem)
