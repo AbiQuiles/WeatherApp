@@ -25,4 +25,4 @@ local.properties
 /.idea/vcs.xml
 /.idea/studiobot.xml
 /.idea/markdown.xml
-/app/google-services.json
+google-services.json
