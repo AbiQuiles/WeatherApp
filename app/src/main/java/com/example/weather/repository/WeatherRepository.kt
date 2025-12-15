@@ -7,13 +7,14 @@ import com.example.weather.models.ui.weather.CurrentWeatherUiState
 import com.example.weather.models.ui.weather.DailyForecastItemUiState
 import com.example.weather.models.ui.weather.WeatherScreenUiState
 import com.example.weather.network.WeatherApi
-import com.example.weather.network.remote.config.RemoteConfigManager
+import com.example.weather.network.remote.config.RemoteConfigRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class WeatherRepository @Inject constructor(
-    private val remoteConfigManager: RemoteConfigManager,
+    private val remoteConfigRepository: RemoteConfigRepository,
     private val api: WeatherApi
 ) {
 
@@ -21,10 +22,10 @@ class WeatherRepository @Inject constructor(
         emit(WeatherScreenUiState(isLoading = true))
 
         try {
-            println("Rez WeathRepo $${remoteConfigManager.weatherApiKey}")
+            val apiKey = remoteConfigRepository.weatherApiKey.first() ?: ""
             val weatherDto: WeatherDto = api.getWeather(
                 query = locationQuery,
-                appid = remoteConfigManager.weatherApiKey
+                appid = apiKey
             )
             val currentWeatherUiState: CurrentWeatherUiState = weatherDto.toUiModel()
             val dailyForecastItemUiStates: List<DailyForecastItemUiState> = weatherDto.list
