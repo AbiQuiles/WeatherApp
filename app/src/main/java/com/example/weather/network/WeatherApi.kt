@@ -12,6 +12,6 @@ interface WeatherApi {
     suspend fun getWeather(
         @Query("q") query: String,
         @Query("units") units: String = "imperial",
-        @Query("appid") appid: String //= "ed60fcfbd110ee65c7150605ea8aceea"
+        @Query("appid") appid: String
     ): WeatherDto
 }
